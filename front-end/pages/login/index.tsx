@@ -1,12 +1,26 @@
 import Header from "@/components/header";
 import Link from 'next/link';
-import { FormEvent, useState } from 'react';
+import { useRouter } from 'next/router';
+import { FormEvent, useState, useEffect } from 'react';
 
 export default function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
+    const router = useRouter();
+
+    // Check if the user is already authenticated
+    useEffect(() => {
+        if (isAuthenticated()) {
+            router.push('/'); // Redirect to dashboard or any other protected route
+        }
+    }, []);
+
+    // Function to check if user is authenticated by checking for token in localStorage
+    function isAuthenticated() {
+        return !!localStorage.getItem('authToken'); // Returns true if token exists
+    }
 
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -14,7 +28,7 @@ export default function Login() {
         setSuccessMessage('');
 
         try {
-            const response = await fetch(process.env.NEXT_PUBLIC_API_URL + '/users/login', { // Adjust the URL as necessary
+            const response = await fetch(process.env.NEXT_PUBLIC_API_URL + '/users/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -27,10 +41,10 @@ export default function Login() {
                 throw new Error(message);
             }
 
-            const message = await response.json();
-            console.log('Login response:', message);
+            const { token } = await response.json();
+            localStorage.setItem('authToken', token);
             setSuccessMessage('Login successful!');
-            // Handle successful login response, e.g., redirect to another page or show a success message
+            router.push('/'); // Redirect to the dashboard on successful login
         } catch (error) {
             setErrorMessage((error as Error).message);
         }

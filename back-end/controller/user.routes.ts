@@ -32,8 +32,10 @@
 
 import express, { NextFunction, Request, Response } from 'express';
 import userService from '../service/user.service';
+import jwt from 'jsonwebtoken';
 
 const userRouter = express.Router();
+const JWT_SECRET = process.env.JWT_SECRET || 'F_wMoWC2jXN2cW2l-aLRtiNNShI9SfVPeEKXg5olAUQ';
 
 /**
  * @swagger
@@ -209,7 +211,8 @@ userRouter.post('/login', async (req: Request, res: Response, next: NextFunction
         const isValidUser = await userService.verifyUserCredentials(email, password);
 
         if (isValidUser) {
-            return res.status(200).json({ message: 'Login successful.' });
+            const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: '1h' });
+            return res.status(200).json({ message: 'Login successful.', token });
         }
 
         return res.status(401).json({ message: 'Invalid email or password.' });

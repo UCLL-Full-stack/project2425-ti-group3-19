@@ -1,4 +1,3 @@
-// pages/buy-tickets.tsx
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Header from '@/components/header';
@@ -7,9 +6,10 @@ import Select from 'react-select';
 export default function BuyTickets() {
     const [selectedOption, setSelectedOption] = useState('Ticket');
     const [subscriptionLength, setSubscriptionLength] = useState('1 Month');
-    const [region, setRegion] = useState(null);
-    const [beginStation, setBeginStation] = useState(null);
-    const [endStation, setEndStation] = useState(null);
+    const [region, setRegion] = useState<{ value: string; label: string } | null>(null);
+    const [beginStation, setBeginStation] = useState<{ value: string; label: string } | null>(null);
+    const [endStation, setEndStation] = useState<{ value: string; label: string } | null>(null);
+    const [errorMessage, setErrorMessage] = useState('');
     const router = useRouter();
 
     const regions = [
@@ -33,17 +33,44 @@ export default function BuyTickets() {
         }
     }, [router]);
 
-    const handleSelectionChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-        setSelectedOption(event.target.value);
-    };
+    const handlePurchase = async () => {
+        // Validate fields based on the selected option
+        if ((selectedOption === 'Ticket' && (!beginStation || !endStation)) ||
+            (selectedOption === 'Subscription' && (!subscriptionLength || !region)) ||
+            (selectedOption === '10-Session Card' && !region)) {
+            setErrorMessage('Please fill out all required fields.');
+            return;
+        }
 
-    const handlePurchase = () => {
-        if (selectedOption === 'Ticket') {
-            alert(`Purchased: ${selectedOption}\nFrom: ${beginStation}\nTo: ${endStation}`);
-        } else if (selectedOption === 'Subscription') {
-            alert(`Purchased: ${selectedOption}\nLength: ${subscriptionLength}\nRegion: ${region}`);
-        } else if (selectedOption === '10-Session Card') {
-            alert(`Purchased: ${selectedOption}\nRegion: ${region}`);
+        // Prepare order data
+        const orderData = {
+            product: selectedOption,
+            orderDate: new Date().toISOString(),
+            price: 50, // Example price
+            region: region?.value,
+            beginStation: beginStation?.value,
+            endStation: endStation?.value,
+            subscriptionLength,
+        };
+
+        try {
+            const response = await fetch('/orders', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+                },
+                body: JSON.stringify(orderData),
+            });
+
+            if (!response.ok) {
+                throw new Error('Order submission failed');
+            }
+
+            alert('Order submitted successfully!');
+            router.push('/confirmation'); // Redirect to a confirmation page if needed
+        } catch (error) {
+            setErrorMessage((error as Error).message);
         }
     };
 
@@ -52,13 +79,14 @@ export default function BuyTickets() {
             <Header />
             <div className="container mt-5">
                 <h2>Buy Tickets and Subscriptions</h2>
+                {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
                 <div className="mb-3">
                     <label htmlFor="ticketOption" className="form-label">Select an Option:</label>
                     <select
                         id="ticketOption"
                         className="form-select"
                         value={selectedOption}
-                        onChange={handleSelectionChange}
+                        onChange={(e) => setSelectedOption(e.target.value)}
                     >
                         <option value="Ticket">Single Ticket</option>
                         <option value="Subscription">Subscription</option>
@@ -74,7 +102,7 @@ export default function BuyTickets() {
                                 id="beginStation"
                                 options={stations}
                                 value={beginStation}
-                                onChange={(selectedOption) => setBeginStation(selectedOption)}
+                                onChange={(option) => setBeginStation(option)}
                                 placeholder="Select start station"
                             />
                         </div>
@@ -84,7 +112,7 @@ export default function BuyTickets() {
                                 id="endStation"
                                 options={stations}
                                 value={endStation}
-                                onChange={(selectedOption) => setEndStation(selectedOption)}
+                                onChange={(option) => setEndStation(option)}
                                 placeholder="Select destination station"
                             />
                         </div>
@@ -113,7 +141,7 @@ export default function BuyTickets() {
                                 id="region"
                                 options={regions}
                                 value={region}
-                                onChange={(selectedOption) => setRegion(selectedOption)}
+                                onChange={(option) => setRegion(option)}
                                 placeholder="Select region"
                             />
                         </div>
@@ -127,7 +155,7 @@ export default function BuyTickets() {
                             id="region"
                             options={regions}
                             value={region}
-                            onChange={(selectedOption) => setRegion(selectedOption)}
+                            onChange={(option) => setRegion(option)}
                             placeholder="Select region"
                         />
                     </div>

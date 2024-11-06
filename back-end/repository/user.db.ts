@@ -4,6 +4,19 @@ import { Role } from '../types';
 
 const users: User[] = [];
 
+// Hardcoded user Wiebe
+const user_wiebe = new User({
+    id: 1,
+    firstName: 'Wiebe',
+    lastName: 'Delvaux',
+    email: 'wiebe.delvaux@gmail.com',
+    password: 'test1',
+    role: 'admin'
+});
+
+// Add the hardcoded user to the users array
+users.push(user_wiebe);
+
 // Function to retrieve all users
 const getAllUsers = (): User[] => {
     return users;

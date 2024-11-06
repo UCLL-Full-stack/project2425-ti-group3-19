@@ -10,6 +10,8 @@ export default function BuyTickets() {
     const [beginStation, setBeginStation] = useState<{ value: string; label: string } | null>(null);
     const [endStation, setEndStation] = useState<{ value: string; label: string } | null>(null);
     const [errorMessage, setErrorMessage] = useState('');
+    const [successMessage, setSuccessMessage] = useState('');
+    const [order_list, setOrderList] = useState<any[]>([]); // Type to accommodate order entries
     const router = useRouter();
 
     const regions = [
@@ -33,53 +35,69 @@ export default function BuyTickets() {
         }
     }, [router]);
 
-    const handlePurchase = async () => {
+    const handleAddOrder = () => {
         // Validate fields based on the selected option
-        if ((selectedOption === 'Ticket' && (!beginStation || !endStation)) ||
+        if (
+            (selectedOption === 'Ticket' && (!beginStation || !endStation)) ||
             (selectedOption === 'Subscription' && (!subscriptionLength || !region)) ||
-            (selectedOption === '10-Session Card' && !region)) {
+            (selectedOption === '10-Session Card' && !region)
+        ) {
             setErrorMessage('Please fill out all required fields.');
+            setSuccessMessage('');
             return;
         }
 
-        // Prepare order data
+        // Define the order data
         const orderData = {
+            id: order_list.length + 1, // Unique ID for each order
             product: selectedOption,
             orderDate: new Date().toISOString(),
             price: 50, // Example price
-            region: region?.value,
-            beginStation: beginStation?.value,
-            endStation: endStation?.value,
+            region: region?.label,
+            beginStation: beginStation?.label,
+            endStation: endStation?.label,
             subscriptionLength,
         };
 
-        try {
-            const response = await fetch('/orders', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
-                },
-                body: JSON.stringify(orderData),
-            });
+        // Add order to list
+        setOrderList((prevOrderList) => [...prevOrderList, orderData]);
+        setErrorMessage('');
+        setSuccessMessage(`${selectedOption} added to list!`);
+        console.log(order_list);
+    };
 
-            if (!response.ok) {
-                throw new Error('Order submission failed');
+    const handlePurchase = async () => {
+        try {
+            for (const order of order_list) {
+                const response = await fetch('/orders', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+                    },
+                    body: JSON.stringify(order),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Order submission failed');
+                }
             }
 
-            alert('Order submitted successfully!');
+            setSuccessMessage('All orders submitted successfully!');
+            setOrderList([]); // Clear the order list after successful submission
             router.push('/confirmation'); // Redirect to a confirmation page if needed
         } catch (error) {
             setErrorMessage((error as Error).message);
+            setSuccessMessage('');
         }
     };
-
     return (
         <>
             <Header />
             <div className="container mt-5">
                 <h2>Buy Tickets and Subscriptions</h2>
                 {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
+                {successMessage && <div className="alert alert-success">{successMessage}</div>}
                 <div className="mb-3">
                     <label htmlFor="ticketOption" className="form-label">Select an Option:</label>
                     <select
@@ -161,8 +179,11 @@ export default function BuyTickets() {
                     </div>
                 )}
 
+                <button className="btn btn-primary" onClick={handleAddOrder}>
+                    Add {selectedOption} to List
+                </button>
                 <button className="btn btn-success" onClick={handlePurchase}>
-                    Buy {selectedOption}
+                    Buy All Orders
                 </button>
             </div>
         </>

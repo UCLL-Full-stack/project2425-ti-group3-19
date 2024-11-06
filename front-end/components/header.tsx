@@ -1,31 +1,34 @@
+// components/Header.tsx
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
 
 export default function Header() {
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const router = useRouter();
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
 
     useEffect(() => {
-        // Check if the authToken exists in localStorage
         const token = localStorage.getItem('authToken');
-        setIsAuthenticated(!!token); // Set to true if token exists, false otherwise
+        setIsLoggedIn(!!token);
     }, []);
 
     const handleLogout = () => {
-        localStorage.removeItem('authToken'); // Clear the token
-        setIsAuthenticated(false); // Update authentication status
-        router.push('/'); // Redirect to homepage or login
+        localStorage.removeItem('authToken');
+        setIsLoggedIn(false);
+        // Optionally, add redirect or page reload after logout
     };
 
     return (
         <header className="d-flex justify-content-between align-items-center p-3 border-bottom bg-dark">
             <Link href="/" passHref style={{ textDecoration: 'none' }}>
-                <h1 className="h3 m-0 text-white">Train tickets</h1>
+                <h1 className="h3 m-0 text-white">Train Tickets</h1>
             </Link>
             <nav>
-                {isAuthenticated ? (
-                    <button onClick={handleLogout} className="btn btn-danger">Logout</button>
+                {isLoggedIn ? (
+                    <>
+                        <Link href="/buy-tickets" passHref>
+                            <button className="btn btn-success me-2">Buy Tickets</button>
+                        </Link>
+                        <button className="btn btn-danger" onClick={handleLogout}>Logout</button>
+                    </>
                 ) : (
                     <>
                         <Link href="/login" passHref>

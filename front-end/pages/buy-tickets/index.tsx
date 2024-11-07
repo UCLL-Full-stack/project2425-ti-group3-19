@@ -11,7 +11,9 @@ export default function BuyTickets() {
     const [endStation, setEndStation] = useState<{ value: string; label: string } | null>(null);
     const [errorMessage, setErrorMessage] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
-    const [order_list, setOrderList] = useState<any[]>([]); // Type to accommodate order entries
+    const [orderList, setOrderList] = useState<any[]>([]);
+    const [isEditing, setIsEditing] = useState(false);
+    const [currentOrderId, setCurrentOrderId] = useState<number | null>(null);
     const router = useRouter();
 
     const regions = [
@@ -35,8 +37,17 @@ export default function BuyTickets() {
         }
     }, [router]);
 
-    const handleAddOrder = () => {
-        // Validate fields based on the selected option
+    const resetForm = () => {
+        setSelectedOption('Ticket');
+        setSubscriptionLength('1 Month');
+        setRegion(null);
+        setBeginStation(null);
+        setEndStation(null);
+        setIsEditing(false);
+        setCurrentOrderId(null);
+    };
+
+    const handleAddOrUpdateOrder = () => {
         if (
             (selectedOption === 'Ticket' && (!beginStation || !endStation)) ||
             (selectedOption === 'Subscription' && (!subscriptionLength || !region)) ||
@@ -47,50 +58,46 @@ export default function BuyTickets() {
             return;
         }
 
-        // Define the order data
         const orderData = {
-            id: order_list.length + 1, // Unique ID for each order
+            id: currentOrderId ?? orderList.length + 1,
             product: selectedOption,
             orderDate: new Date().toISOString(),
-            price: 50, // Example price
+            price: 50,
             region: region?.label,
             beginStation: beginStation?.label,
             endStation: endStation?.label,
-            subscriptionLength,
+            subscriptionLength: selectedOption === 'Subscription' ? subscriptionLength : null,
         };
 
-        // Add order to list
-        setOrderList((prevOrderList) => [...prevOrderList, orderData]);
+        if (isEditing && currentOrderId !== null) {
+            setOrderList(orderList.map(order => order.id === currentOrderId ? orderData : order));
+            setSuccessMessage(`${selectedOption} updated successfully!`);
+        } else {
+            setOrderList([...orderList, orderData]);
+            setSuccessMessage(`${selectedOption} added to list!`);
+        }
+
         setErrorMessage('');
-        setSuccessMessage(`${selectedOption} added to list!`);
-        console.log(order_list);
+        resetForm();
     };
 
-    const handlePurchase = async () => {
-        try {
-            for (const order of order_list) {
-                const response = await fetch('/orders', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
-                    },
-                    body: JSON.stringify(order),
-                });
-
-                if (!response.ok) {
-                    throw new Error('Order submission failed');
-                }
-            }
-
-            setSuccessMessage('All orders submitted successfully!');
-            setOrderList([]); // Clear the order list after successful submission
-            router.push('/confirmation'); // Redirect to a confirmation page if needed
-        } catch (error) {
-            setErrorMessage((error as Error).message);
-            setSuccessMessage('');
+    const handleEditOrder = (orderId) => {
+        const order = orderList.find(order => order.id === orderId);
+        if (order) {
+            setSelectedOption(order.product);
+            setRegion(order.region ? { value: order.region.toLowerCase(), label: order.region } : null);
+            setBeginStation(order.beginStation ? { value: order.beginStation.toLowerCase(), label: order.beginStation } : null);
+            setEndStation(order.endStation ? { value: order.endStation.toLowerCase(), label: order.endStation } : null);
+            setSubscriptionLength(order.subscriptionLength || '1 Month');
+            setIsEditing(true);
+            setCurrentOrderId(order.id);
         }
     };
+
+    const handleRemoveOrder = (orderId) => {
+        setOrderList(orderList.filter(order => order.id !== orderId));
+    };
+
     return (
         <>
             <Header />
@@ -179,12 +186,43 @@ export default function BuyTickets() {
                     </div>
                 )}
 
-                <button className="btn btn-primary" onClick={handleAddOrder}>
-                    Add {selectedOption} to List
+                <button className="btn btn-primary" onClick={handleAddOrUpdateOrder}>
+                    {isEditing ? 'Update Order' : `Add ${selectedOption} to List`}
                 </button>
-                <button className="btn btn-success" onClick={handlePurchase}>
-                    Buy All Orders
-                </button>
+
+                <table className="table mt-4">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Product</th>
+                            <th>Order Date</th>
+                            <th>Price</th>
+                            <th>Region</th>
+                            <th>Begin Station</th>
+                            <th>End Station</th>
+                            <th>Subscription Length</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {orderList.map((order) => (
+                            <tr key={order.id}>
+                                <td>{order.id}</td>
+                                <td>{order.product}</td>
+                                <td>{order.orderDate}</td>
+                                <td>{order.price}</td>
+                                <td>{order.region || 'N/A'}</td>
+                                <td>{order.beginStation || 'N/A'}</td>
+                                <td>{order.endStation || 'N/A'}</td>
+                                <td>{order.subscriptionLength || 'N/A'}</td>
+                                <td>
+                                    <button className="btn btn-warning btn-sm me-2" onClick={() => handleEditOrder(order.id)}>Edit</button>
+                                    <button className="btn btn-danger btn-sm" onClick={() => handleRemoveOrder(order.id)}>Remove</button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
             </div>
         </>
     );

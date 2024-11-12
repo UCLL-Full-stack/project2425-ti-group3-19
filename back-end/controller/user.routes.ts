@@ -33,6 +33,8 @@
 import express, { NextFunction, Request, Response } from 'express';
 import userService from '../service/user.service';
 import jwt from 'jsonwebtoken';
+import { orderRouter } from './order.routes';
+import orderService from '../service/order.service';
 
 const userRouter = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'F_wMoWC2jXN2cW2l-aLRtiNNShI9SfVPeEKXg5olAUQ';
@@ -222,5 +224,80 @@ userRouter.post('/login', async (req: Request, res: Response, next: NextFunction
     }
 });
 
+
+/**
+ * @swagger
+ * /users/orders:
+ *   post:
+ *     summary: Create and add a new order to a user.
+ *     description: Creates a new order with the provided data.
+ *     tags:
+ *       - Users
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               product:
+ *                 type: string
+ *                 description: Product description.
+ *               price:
+ *                 type: number
+ *                 format: int64
+ *                 description: Product price.
+ *               userID:
+ *                 type: number
+ *                 format: int64
+ *                 description: ID of the user who orders.
+ *               promotions:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Promotions associated with the order.
+ *     responses:
+ *       201:
+ *         description: Order created successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Order'
+ *       400:
+ *         description: Bad request.
+ *       422:
+ *         description: Unprocessable entity due to validation errors.
+ *       500:
+ *         description: Internal server error.
+ */
+userRouter.post('/orders', async (req: Request, res: Response, next: NextFunction) => {
+    console.log("POST /users/orders route accessed");
+    try {
+        const { product, price, userID, promotions } = req.body;
+
+        //get the user by id
+        const user = userService.getUserById(userID);
+
+        const orderDate = new Date();
+
+        //create a order using the service
+        const newOrder = orderService.createOrder({ orderDate, product, price, user, promotions });
+
+        //respond with the newly created user
+        return res.status(201).json(newOrder);
+    } catch (error) {
+        // Handle specific error types
+        if ((error as Error).message.includes('required')) {
+            return res.status(400).json({ message: (error as Error).message }); // Bad request for validation issues
+        } else if ((error as Error).message.includes('Validation error')) {
+            return res.status(422).json({ message: (error as Error).message }); // Unprocessable entity for validation errors
+        }
+
+        // For any other unexpected error, pass it to the next middleware
+        console.error('Unexpected error:', error);
+        return next(error);
+    }
+
+});
 
 export { userRouter };

@@ -14,6 +14,7 @@ const saveOrder = (orderData: {
 }): Order => {
     // Create a new order instance
     const newOrder = new Order({
+        id: orders.length + 1,
         orderDate: orderData.orderDate,
         product: orderData.product,
         price: orderData.price,
@@ -33,9 +34,6 @@ const saveOrder = (orderData: {
     } catch (validationError) {
         throw new Error(`Validation error: ${(validationError as Error).message}`);
     }
-
-    // Assign a unique ID to the order
-    newOrder['id'] = orders.length + 1;
 
     // Add the new order to the orders array
     orders.push(newOrder);

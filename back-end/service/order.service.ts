@@ -24,6 +24,14 @@ const createOrder = async (orderData: {
     });
 };
 
+const getOrderById = (id: number): Order => {
+    const order = orderRepository.getOrderById(id);
+    if (!order) {
+        throw new Error(`User with id ${id} does not exist.`);
+    }
+    return order;
+};
+
 
 //Method to get all orders
 const getAllOrders = (): Order[] => {
@@ -31,6 +39,7 @@ const getAllOrders = (): Order[] => {
 };
 
 export default {
+    getOrderById,
     getAllOrders,
     createOrder,
     // other order-related methods...

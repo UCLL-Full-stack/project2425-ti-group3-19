@@ -1,15 +1,15 @@
 import { Order } from './order'; // Assuming Order class is in the same directory
 
 export class Subscription {
-    private id: number; // Not optional
+    private id?: number;
     private region: string;
     private subtype: string;
     private startDate: Date;
     private endDate: Date;
-    private orderId: number;
+    private order: Order;
 
     constructor(subscription: {
-        id: number;
+        id?: number;
         region: string;
         subtype: string;
         startDate: Date;
@@ -23,10 +23,10 @@ export class Subscription {
         this.subtype = subscription.subtype;
         this.startDate = subscription.startDate;
         this.endDate = subscription.endDate;
-        this.orderId = subscription.order.getOrderId()!;
+        this.order = subscription.order;
     }
 
-    getId(): number {
+    getId(): number | undefined {
         return this.id;
     }
 
@@ -46,19 +46,20 @@ export class Subscription {
         return this.endDate;
     }
 
-    getOrderId(): number {
-        return this.orderId;
+    getOrder(): Order {
+        return this.order;
     }
 
     validate(subscription: {
-        id: number;
+        id?: number;
         region: string;
         subtype: string;
         startDate: Date;
         endDate: Date;
         order: Order;
     }) {
-        if (subscription.id <= 0) {
+        // Only validate id if it is provided
+        if (subscription.id !== undefined && subscription.id <= 0) {
             throw new Error('ID must be a positive number');
         }
         if (!subscription.region?.trim()) {
@@ -85,7 +86,7 @@ export class Subscription {
             this.subtype === subscription.getSubtype() &&
             this.startDate.getTime() === subscription.getStartDate().getTime() &&
             this.endDate.getTime() === subscription.getEndDate().getTime() &&
-            this.orderId === subscription.getOrderId()
+            this.order.getOrderId() === subscription.getOrder().getOrderId()
         );
     }
 }

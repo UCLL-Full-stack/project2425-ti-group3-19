@@ -35,6 +35,8 @@ import userService from '../service/user.service';
 import jwt from 'jsonwebtoken';
 import { orderRouter } from './order.routes';
 import orderService from '../service/order.service';
+import subscriptionService from '../service/subscription.service';
+
 
 const userRouter = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'F_wMoWC2jXN2cW2l-aLRtiNNShI9SfVPeEKXg5olAUQ';
@@ -243,6 +245,9 @@ userRouter.post('/login', async (req: Request, res: Response, next: NextFunction
  *               product:
  *                 type: string
  *                 description: Product description.
+ *               region:
+ *                 type: string
+ *                 description: Region of product.
  *               price:
  *                 type: number
  *                 format: int64
@@ -271,33 +276,45 @@ userRouter.post('/login', async (req: Request, res: Response, next: NextFunction
  *         description: Internal server error.
  */
 userRouter.post('/orders', async (req: Request, res: Response, next: NextFunction) => {
-    console.log("POST /users/orders route accessed");
     try {
-        const { product, price, userID, promotions } = req.body;
+        const { product, price, userID, promotions, region } = req.body;
 
-        //get the user by id
         const user = userService.getUserById(userID);
 
         const orderDate = new Date();
 
-        //create a order using the service
-        const newOrder = orderService.createOrder({ orderDate, product, price, user, promotions });
+        const order = await orderService.createOrder({ orderDate, product, price, user, promotions });
 
-        //respond with the newly created user
-        return res.status(201).json(newOrder);
-    } catch (error) {
-        // Handle specific error types
-        if ((error as Error).message.includes('required')) {
-            return res.status(400).json({ message: (error as Error).message }); // Bad request for validation issues
-        } else if ((error as Error).message.includes('Validation error')) {
-            return res.status(422).json({ message: (error as Error).message }); // Unprocessable entity for validation errors
+        const startDate = new Date();
+        const endDate = new Date();
+
+        let newProduct;
+        if (product === "6MONTHS") {
+            endDate.setMonth(endDate.getMonth() + 6);
+            newProduct = await subscriptionService.addSubscriptionToOrder({ region, product, price, startDate, endDate, order });
+        } else if (product === "12MONTHS") {
+            endDate.setMonth(endDate.getMonth() + 12);
+            newProduct = await subscriptionService.addSubscriptionToOrder({ region, product, price, startDate, endDate, order });
+        } else if (product === "3MONTHS") {
+            endDate.setMonth(endDate.getMonth() + 3);
+            newProduct = await subscriptionService.addSubscriptionToOrder({ region, product, price, startDate, endDate, order });
+        } else if (product === "1MONTHS") {
+            endDate.setMonth(endDate.getMonth() + 1);
+            newProduct = await subscriptionService.addSubscriptionToOrder({ region, product, price, startDate, endDate, order });
         }
 
-        // For any other unexpected error, pass it to the next middleware
+        return res.status(201).json({ order, subscription: newProduct });
+    } catch (error) {
+        if ((error as Error).message.includes('required')) {
+            return res.status(400).json({ message: (error as Error).message });
+        } else if ((error as Error).message.includes('Validation error')) {
+            return res.status(422).json({ message: (error as Error).message });
+        }
+
         console.error('Unexpected error:', error);
         return next(error);
     }
-
 });
+
 
 export { userRouter };

@@ -8,6 +8,7 @@ import swaggerUi from 'swagger-ui-express';
 import { userRouter } from './controller/user.routes';
 import { orderRouter } from './controller/order.routes';
 import { subscriptionRouter } from './controller/subscription.routes';
+import { beurtenkaartRouter } from './controller/beurtenkaart.routes';
 
 const app = express();
 dotenv.config();
@@ -19,6 +20,7 @@ app.use(bodyParser.json());
 app.use('/users', userRouter);
 app.use('/orders', orderRouter);
 app.use('/subscriptions', subscriptionRouter);
+app.use('/beurtenkaarten', beurtenkaartRouter);
 
 app.get('/status', (req, res) => {
     res.json({ message: 'Back-end is running...' });

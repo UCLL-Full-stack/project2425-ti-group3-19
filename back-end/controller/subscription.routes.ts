@@ -31,7 +31,6 @@
  */
 import express, { NextFunction, Request, Response } from 'express';
 import subscriptionService from '../service/subscription.service';
-import { Subscription } from '../model/subscription';
 
 const subscriptionRouter = express.Router();
 
@@ -42,7 +41,7 @@ const subscriptionRouter = express.Router();
  *     summary: Get a list of all subscriptions.
  *     description: Returns a JSON array of all subscriptions. Each order object contains an ID, region, subType, startDate, endDate, and Order object.
  *     tags:
- *       - subscriptions
+ *       - Subscriptions
  *     responses:
  *       200:
  *         description: A list of subscriptions.

@@ -6,7 +6,6 @@ import orderService from "./order.service";
 const addSubscriptionToOrder = async (subscriptionData: {
     region: string;
     product: string; // This is the subtype of the subscription
-    price: number;
     startDate: Date;
     endDate: Date;
     order: Order;
@@ -30,6 +29,12 @@ const addSubscriptionToOrder = async (subscriptionData: {
     });
 };
 
+//Method to get all subscriptions
+const getAllSubscriptions = (): Subscription[] => {
+    return subscriptionRepository.getAllSubscriptions();
+};
+
 export default {
     addSubscriptionToOrder,
+    getAllSubscriptions,
 };

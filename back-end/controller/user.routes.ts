@@ -36,6 +36,7 @@ import jwt from 'jsonwebtoken';
 import { orderRouter } from './order.routes';
 import orderService from '../service/order.service';
 import subscriptionService from '../service/subscription.service';
+import beurtenkaartService from '../service/beurtenkaart.service';
 
 
 const userRouter = express.Router();
@@ -291,16 +292,19 @@ userRouter.post('/orders', async (req: Request, res: Response, next: NextFunctio
         let newProduct;
         if (product === "6MONTHS") {
             endDate.setMonth(endDate.getMonth() + 6);
-            newProduct = await subscriptionService.addSubscriptionToOrder({ region, product, price, startDate, endDate, order });
+            newProduct = await subscriptionService.addSubscriptionToOrder({ region, product, startDate, endDate, order });
         } else if (product === "12MONTHS") {
             endDate.setMonth(endDate.getMonth() + 12);
-            newProduct = await subscriptionService.addSubscriptionToOrder({ region, product, price, startDate, endDate, order });
+            newProduct = await subscriptionService.addSubscriptionToOrder({ region, product, startDate, endDate, order });
         } else if (product === "3MONTHS") {
             endDate.setMonth(endDate.getMonth() + 3);
-            newProduct = await subscriptionService.addSubscriptionToOrder({ region, product, price, startDate, endDate, order });
+            newProduct = await subscriptionService.addSubscriptionToOrder({ region, product, startDate, endDate, order });
         } else if (product === "1MONTHS") {
             endDate.setMonth(endDate.getMonth() + 1);
-            newProduct = await subscriptionService.addSubscriptionToOrder({ region, product, price, startDate, endDate, order });
+            newProduct = await subscriptionService.addSubscriptionToOrder({ region, product, startDate, endDate, order });
+        } else if (product == "10TIMES") {
+            endDate.setMonth(endDate.getMonth() + 12);
+            newProduct = await beurtenkaartService.addBeurtenkaartToOrder({ price, startDate, endDate, order });
         }
 
         return res.status(201).json({ order, subscription: newProduct });

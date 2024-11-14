@@ -1,17 +1,16 @@
-import { isAfter } from 'date-fns';
 import { Order } from './order'; // Assuming Order class is in the same directory
 
 export class Beurtenkaart {
-    private id: number; // Not optional
+    private id?: number; 
     private beurten: number;
     private price: number;
     private valid: boolean;
     private startDate: Date;
     private endDate: Date;
-    private orderId: number;
+    private order: Order;
 
     constructor(beurtenkaart: {
-        id: number;
+        id?: number;
         beurten: number;
         price: number;
         valid: boolean;
@@ -27,10 +26,10 @@ export class Beurtenkaart {
         this.valid = beurtenkaart.valid;
         this.startDate = beurtenkaart.startDate;
         this.endDate = beurtenkaart.endDate;
-        this.orderId = beurtenkaart.order.getOrderId()!;
+        this.order = beurtenkaart.order;
     }
 
-    getId(): number {
+    getId(): number | undefined{
         return this.id;
     }
 
@@ -54,12 +53,12 @@ export class Beurtenkaart {
         return this.endDate;
     }
 
-    getOrderId(): number {
-        return this.orderId;
+    getOrder(): Order {
+        return this.order;
     }
 
     validate(beurtenkaart: {
-        id: number;
+        id?: number;
         beurten: number;
         price: number;
         valid: boolean;
@@ -67,7 +66,7 @@ export class Beurtenkaart {
         endDate: Date;
         order: Order;
     }) {
-        if (beurtenkaart.id <= 0) {
+        if (beurtenkaart.id !== undefined && beurtenkaart.id <= 0) {
             throw new Error('ID must be a positive number');
         }
         if (beurtenkaart.beurten <= 0) {
@@ -98,7 +97,7 @@ export class Beurtenkaart {
             this.valid === beurtenkaart.isValid() &&
             this.startDate.getTime() === beurtenkaart.getStartDate().getTime() &&
             this.endDate.getTime() === beurtenkaart.getEndDate().getTime() &&
-            this.orderId === beurtenkaart.getOrderId()
+            this.order.getOrderId() === beurtenkaart.getOrder().getOrderId()
         );
     }
 }

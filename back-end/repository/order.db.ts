@@ -12,9 +12,15 @@ const saveOrder = (orderData: {
     user: User;
     promotions: Promotion[];
 }): Order => {
+
+    const parsedOrderDate = new Date(orderData.orderDate);
+
+    if (isNaN(parsedOrderDate.getTime())) {
+        throw new Error('Invalid order date');
+    }
     // Create a new order instance
     const newOrder = new Order({
-        orderDate: orderData.orderDate,
+        orderDate: parsedOrderDate,
         product: orderData.product,
         price: orderData.price,
         user: orderData.user, // Use the full user object passed in
@@ -24,7 +30,7 @@ const saveOrder = (orderData: {
     // Optionally validate the new order data
     try {
         newOrder.validate({
-            orderDate: orderData.orderDate,
+            orderDate: parsedOrderDate,
             product: orderData.product,
             price: orderData.price,
             user: orderData.user, // Pass the full user object

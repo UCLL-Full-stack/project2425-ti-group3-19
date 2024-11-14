@@ -69,7 +69,7 @@ export class Order {
             throw new Error('Price must be a positive number');
         }
         if (!order.user) {
-            throw new Error('User ID is required');
+            throw new Error('User is required');
         }
     }
 

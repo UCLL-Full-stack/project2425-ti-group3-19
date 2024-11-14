@@ -11,8 +11,17 @@ const createOrder = async (orderData: {
     user: User;
     promotions: Promotion[];
 }): Promise<Order> => {
+
+    const parsedOrderDate = new Date(orderData.orderDate);
+
+    if (isNaN(parsedOrderDate.getTime())) {
+        throw new Error('Invalid order date');
+    }
     // Create a new Order instance using the provided data
-    const order = new Order(orderData);
+    const order = new Order({
+        ...orderData,
+        orderDate: parsedOrderDate,  // Ensure it's passed as a Date object
+    });
 
     // Save the order using the repository and return the saved order
     return await orderRepository.saveOrder({
@@ -24,6 +33,20 @@ const createOrder = async (orderData: {
     });
 };
 
+const createMultipleOrders = async (ordersData: {
+    orderDate: Date;
+    product: string;
+    price: number;
+    user: User;
+    promotions: Promotion[];
+}[]): Promise<Order[]> => {
+    const orders: Order[] = [];
+    for (const data of ordersData) {
+        const order = await createOrder(data);  // Reuse the single order creation function
+        orders.push(order);
+    }
+    return orders;
+};
 
 //Method to get all orders
 const getAllOrders = (): Order[] => {
@@ -33,5 +56,6 @@ const getAllOrders = (): Order[] => {
 export default {
     getAllOrders,
     createOrder,
+    createMultipleOrders,
     // other order-related methods...
 };

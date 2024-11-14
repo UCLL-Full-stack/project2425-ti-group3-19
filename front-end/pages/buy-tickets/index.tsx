@@ -15,6 +15,7 @@ export default function BuyTickets() {
     const [isEditing, setIsEditing] = useState(false);
     const [currentOrderId, setCurrentOrderId] = useState<number | null>(null);
     const router = useRouter();
+    const [token, setToken] = useState<string | null>(null);
 
     const regions = [
         { value: 'north', label: 'North' },
@@ -29,13 +30,14 @@ export default function BuyTickets() {
         { value: 'station3', label: 'Station 3' },
         { value: 'station4', label: 'Station 4' },
     ];
-
     useEffect(() => {
         const token = localStorage.getItem('authToken');
+        setToken(token);
         if (!token) {
             router.push('/login');
         }
     }, [router]);
+
 
     const resetForm = () => {
         setSelectedOption('Ticket');
@@ -58,10 +60,12 @@ export default function BuyTickets() {
             return;
         }
 
+        const orderDate = new Date(); // This will create a Date object (not a string)
+
         const orderData = {
             id: currentOrderId ?? orderList.length + 1,
             product: selectedOption,
-            orderDate: new Date().toISOString(),
+            orderDate: orderDate.toISOString(),
             price: 50,
             region: region?.label,
             beginStation: beginStation?.label,
@@ -81,7 +85,7 @@ export default function BuyTickets() {
         resetForm();
     };
 
-    const handleEditOrder = (orderId) => {
+    const handleEditOrder = (orderId: number) => {
         const order = orderList.find(order => order.id === orderId);
         if (order) {
             setSelectedOption(order.product);
@@ -94,9 +98,39 @@ export default function BuyTickets() {
         }
     };
 
-    const handleRemoveOrder = (orderId) => {
+    const handleRemoveOrder = (orderId: number) => {
         setOrderList(orderList.filter(order => order.id !== orderId));
     };
+
+    const handlePurchase = async () => {
+        if (orderList.length === 0) {
+            setErrorMessage('Please add at least one item before purchasing.');
+            setSuccessMessage('');
+            return;
+        }
+
+        try {
+            const response = await fetch(process.env.NEXT_PUBLIC_API_URL + '/orders', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify({ orders: orderList }),
+            });
+
+            if (response.ok) {
+                setSuccessMessage('Order successfully placed!');
+                setOrderList([]); // Clear the list after successful purchase
+            } else {
+                const errorData = await response.json();
+                setErrorMessage(errorData.message || 'Failed to place order.');
+            }
+        } catch (error) {
+            setErrorMessage('An error occurred while placing the order.');
+        }
+    };
+
 
     return (
         <>
@@ -105,122 +139,111 @@ export default function BuyTickets() {
                 <h2>Buy Tickets and Subscriptions</h2>
                 {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
                 {successMessage && <div className="alert alert-success">{successMessage}</div>}
-                <div className="mb-3">
-                    <label htmlFor="ticketOption" className="form-label">Select an Option:</label>
+
+                {/* Selection Form */}
+                <div>
+                    <label>Product Type</label>
                     <select
-                        id="ticketOption"
-                        className="form-select"
                         value={selectedOption}
                         onChange={(e) => setSelectedOption(e.target.value)}
+                        className="form-select"
                     >
-                        <option value="Ticket">Single Ticket</option>
+                        <option value="Ticket">Ticket</option>
                         <option value="Subscription">Subscription</option>
                         <option value="10-Session Card">10-Session Card</option>
                     </select>
-                </div>
 
-                {selectedOption === 'Ticket' && (
-                    <>
-                        <div className="mb-3">
-                            <label htmlFor="beginStation" className="form-label">Begin Station:</label>
-                            <Select
-                                id="beginStation"
-                                options={stations}
-                                value={beginStation}
-                                onChange={(option) => setBeginStation(option)}
-                                placeholder="Select start station"
-                            />
-                        </div>
-                        <div className="mb-3">
-                            <label htmlFor="endStation" className="form-label">End Station:</label>
-                            <Select
-                                id="endStation"
-                                options={stations}
-                                value={endStation}
-                                onChange={(option) => setEndStation(option)}
-                                placeholder="Select destination station"
-                            />
-                        </div>
-                    </>
-                )}
-
-                {selectedOption === 'Subscription' && (
-                    <>
-                        <div className="mb-3">
-                            <label htmlFor="subscriptionLength" className="form-label">Subscription Length:</label>
+                    {selectedOption === 'Subscription' && (
+                        <div>
+                            <label>Subscription Length</label>
                             <select
-                                id="subscriptionLength"
-                                className="form-select"
                                 value={subscriptionLength}
                                 onChange={(e) => setSubscriptionLength(e.target.value)}
+                                className="form-select"
                             >
                                 <option value="1 Month">1 Month</option>
                                 <option value="3 Months">3 Months</option>
                                 <option value="6 Months">6 Months</option>
-                                <option value="12 Months">12 Months</option>
+                                <option value="1 Year">1 Year</option>
                             </select>
                         </div>
-                        <div className="mb-3">
-                            <label htmlFor="region" className="form-label">Region:</label>
+                    )}
+
+                    {['Subscription', '10-Session Card'].includes(selectedOption) && (
+                        <div>
+                            <label>Region</label>
                             <Select
-                                id="region"
                                 options={regions}
                                 value={region}
-                                onChange={(option) => setRegion(option)}
-                                placeholder="Select region"
+                                onChange={setRegion}
+                                placeholder="Select Region"
                             />
                         </div>
-                    </>
-                )}
+                    )}
 
-                {selectedOption === '10-Session Card' && (
-                    <div className="mb-3">
-                        <label htmlFor="region" className="form-label">Region:</label>
-                        <Select
-                            id="region"
-                            options={regions}
-                            value={region}
-                            onChange={(option) => setRegion(option)}
-                            placeholder="Select region"
-                        />
-                    </div>
-                )}
+                    {selectedOption === 'Ticket' && (
+                        <>
+                            <div>
+                                <label>Begin Station</label>
+                                <Select
+                                    options={stations}
+                                    value={beginStation}
+                                    onChange={setBeginStation}
+                                    placeholder="Select Begin Station"
+                                />
+                            </div>
+                            <div>
+                                <label>End Station</label>
+                                <Select
+                                    options={stations}
+                                    value={endStation}
+                                    onChange={setEndStation}
+                                    placeholder="Select End Station"
+                                />
+                            </div>
+                        </>
+                    )}
 
-                <button className="btn btn-primary" onClick={handleAddOrUpdateOrder}>
-                    {isEditing ? 'Update Order' : `Add ${selectedOption} to List`}
-                </button>
+                    <button className="btn btn-primary mt-3" onClick={handleAddOrUpdateOrder}>
+                        {isEditing ? 'Update Order' : `Add ${selectedOption} to List`}
+                    </button>
+
+                    <button className="btn btn-success mt-3 ms-2" onClick={handlePurchase}>
+                        Buy All Products
+                    </button>
+                </div>
 
                 <table className="table mt-4">
                     <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Product</th>
-                            <th>Order Date</th>
-                            <th>Price</th>
-                            <th>Region</th>
-                            <th>Begin Station</th>
-                            <th>End Station</th>
-                            <th>Subscription Length</th>
-                            <th>Actions</th>
-                        </tr>
+                    <tr>
+                        <th>ID</th>
+                        <th>Product</th>
+                        <th>Order Date</th>
+                        <th>Price</th>
+                        <th>Region</th>
+                        <th>Begin Station</th>
+                        <th>End Station</th>
+                        <th>Subscription Length</th>
+                        <th>Actions</th>
+                    </tr>
                     </thead>
                     <tbody>
-                        {orderList.map((order) => (
-                            <tr key={order.id}>
-                                <td>{order.id}</td>
-                                <td>{order.product}</td>
-                                <td>{order.orderDate}</td>
-                                <td>{order.price}</td>
-                                <td>{order.region || 'N/A'}</td>
-                                <td>{order.beginStation || 'N/A'}</td>
-                                <td>{order.endStation || 'N/A'}</td>
-                                <td>{order.subscriptionLength || 'N/A'}</td>
-                                <td>
-                                    <button className="btn btn-warning btn-sm me-2" onClick={() => handleEditOrder(order.id)}>Edit</button>
-                                    <button className="btn btn-danger btn-sm" onClick={() => handleRemoveOrder(order.id)}>Remove</button>
-                                </td>
-                            </tr>
-                        ))}
+                    {orderList.map((order) => (
+                        <tr key={order.id}>
+                            <td>{order.id}</td>
+                            <td>{order.product}</td>
+                            <td>{new Date(order.orderDate).toLocaleDateString()}</td>
+                            <td>${order.price}</td>
+                            <td>{order.region}</td>
+                            <td>{order.beginStation}</td>
+                            <td>{order.endStation}</td>
+                            <td>{order.subscriptionLength}</td>
+                            <td>
+                                <button className="btn btn-warning btn-sm me-2" onClick={() => handleEditOrder(order.id)}>Edit</button>
+                                <button className="btn btn-danger btn-sm" onClick={() => handleRemoveOrder(order.id)}>Remove</button>
+                            </td>
+                        </tr>
+                    ))}
                     </tbody>
                 </table>
             </div>

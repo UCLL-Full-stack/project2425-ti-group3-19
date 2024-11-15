@@ -4,6 +4,7 @@ import userRepository from '../repository/user.db';
 import { Role } from '../types';
 import { Order } from '../model/order';
 import orderService from './order.service';
+import {v4 as uuidv4} from "uuid";
 
 const getAllUsers = (): User[] => {
     return userRepository.getAllUsers();
@@ -43,12 +44,15 @@ const createUser = async (userData: { firstName: string; lastName: string; email
     try {
         const newUser = userRepository.saveUser(userData);
 
+        const orderReferentie = uuidv4();
+
         const order = new Order({
             orderDate: new Date(),
             product: 'User Registration',
             price: 0,
             user: newUser, // Pass the User object directly
             promotions: [],
+            orderReferentie,
         });
 
         orderService.createOrder({
@@ -56,7 +60,8 @@ const createUser = async (userData: { firstName: string; lastName: string; email
             product: order.getProduct(),
             price: order.getPrice(),
             user: order.getUser(),
-            promotions: order.getPromotions()
+            promotions: order.getPromotions(),
+            orderReferentie: order.getorderReferentie()
         });
 
         return newUser; // Return the newly created user

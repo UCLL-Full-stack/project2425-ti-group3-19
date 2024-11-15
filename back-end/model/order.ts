@@ -8,6 +8,7 @@ export class Order {
     private price: number;
     private user: User;
     private promotions: Promotion[];
+    private orderReferentie: string;
 
     constructor(order: {
         id?: number;
@@ -16,6 +17,7 @@ export class Order {
         price: number;
         user: User;
         promotions: Promotion[];
+        orderReferentie: string;
 
     }) {
         this.validate(order);
@@ -26,6 +28,7 @@ export class Order {
         this.price = order.price;
         this.user = order.user;
         this.promotions = order.promotions;
+        this.orderReferentie = order.orderReferentie;
     }
 
     getOrderDate(): Date {
@@ -52,12 +55,17 @@ export class Order {
         return this.promotions;
     }
 
+    getorderReferentie(): string {
+        return this.orderReferentie;
+    }
+
     validate(order: {
         orderDate: Date;
         product: string;
         price: number;
         user: User;
         promotions: Promotion[];
+        orderReferentie: string;
     }) {
         if (!(order.orderDate instanceof Date)) {
             throw new Error('Order date must be a valid date');
@@ -71,6 +79,9 @@ export class Order {
         if (!order.user) {
             throw new Error('User is required');
         }
+        if (!order.orderReferentie) {
+            throw new Error('OrderReferenties is required');
+        }
     }
 
     equals(order: Order): boolean {
@@ -78,7 +89,8 @@ export class Order {
             this.product === order.getProduct() &&
             this.price === order.getPrice() &&
             this.user.getId() === order.getUser().getId() && // Compare by User ID
-            this.promotions.every((promotion, index) => promotion.equals(order.getPromotions()[index]))
+            this.promotions.every((promotion, index) => promotion.equals(order.getPromotions()[index])) &&
+            this.orderReferentie === order.getorderReferentie()
         );
     }
 }

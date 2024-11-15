@@ -3,6 +3,7 @@ import { Order } from '../model/order';
 import orderRepository from '../repository/order.db';
 import { User } from '../model/user';
 import { Promotion } from '../model/promotion';
+import { v4 as uuidv4 } from 'uuid';
 
 const createOrder = async (orderData: {
     orderDate: Date;
@@ -10,6 +11,7 @@ const createOrder = async (orderData: {
     price: number;
     user: User;
     promotions: Promotion[];
+    orderReferentie: string;
 }): Promise<Order> => {
 
     const parsedOrderDate = new Date(orderData.orderDate);
@@ -20,16 +22,17 @@ const createOrder = async (orderData: {
     // Create a new Order instance using the provided data
     const order = new Order({
         ...orderData,
-        orderDate: parsedOrderDate,  // Ensure it's passed as a Date object
+        orderDate: parsedOrderDate,
     });
 
     // Save the order using the repository and return the saved order
-    return await orderRepository.saveOrder({
+    return orderRepository.saveOrder({
         orderDate: order.getOrderDate(),
         product: order.getProduct(),
         price: order.getPrice(),
         user: order.getUser(),
-        promotions: order.getPromotions()
+        promotions: order.getPromotions(),
+        orderReferentie: order.getorderReferentie(),
     });
 };
 
@@ -40,9 +43,10 @@ const createMultipleOrders = async (ordersData: {
     user: User;
     promotions: Promotion[];
 }[]): Promise<Order[]> => {
+    const orderReferentie = uuidv4();
     const orders: Order[] = [];
     for (const data of ordersData) {
-        const order = await createOrder(data);  // Reuse the single order creation function
+        const order = await createOrder({...data, orderReferentie});  // Reuse the single order creation function
         orders.push(order);
     }
     return orders;

@@ -1,6 +1,7 @@
 import { Order } from '../model/order';
 import { Promotion } from '../model/promotion';
-import { User } from '../model/user'; // Import User type
+import { User } from '../model/user';
+import {v4 as uuidv4} from "uuid"; // Import User type
 
 const orders: Order[] = []; // In-memory storage for orders
 
@@ -11,6 +12,7 @@ const saveOrder = (orderData: {
     price: number;
     user: User;
     promotions: Promotion[];
+    orderReferentie?: string;
 }): Order => {
 
     const parsedOrderDate = new Date(orderData.orderDate);
@@ -18,6 +20,9 @@ const saveOrder = (orderData: {
     if (isNaN(parsedOrderDate.getTime())) {
         throw new Error('Invalid order date');
     }
+
+    const orderReferentie = uuidv4();
+
     // Create a new order instance
     const newOrder = new Order({
         orderDate: parsedOrderDate,
@@ -25,6 +30,7 @@ const saveOrder = (orderData: {
         price: orderData.price,
         user: orderData.user, // Use the full user object passed in
         promotions: orderData.promotions,
+        orderReferentie: orderReferentie,
     });
 
     // Optionally validate the new order data
@@ -35,6 +41,7 @@ const saveOrder = (orderData: {
             price: orderData.price,
             user: orderData.user, // Pass the full user object
             promotions: orderData.promotions,
+            orderReferentie: orderReferentie,
         });
     } catch (validationError) {
         throw new Error(`Validation error: ${(validationError as Error).message}`);

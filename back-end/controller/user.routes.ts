@@ -222,5 +222,43 @@ userRouter.post('/login', async (req: Request, res: Response, next: NextFunction
     }
 });
 
+/**
+ * @swagger
+ * /users/profile:
+ *   get:
+ *     summary: Get the logged-in user's profile.
+ *     description: Returns the profile of the currently logged-in user based on the JWT token.
+ *     tags:
+ *       - Users
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: The user profile object.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       401:
+ *         description: Unauthorized if token is invalid or missing.
+ *       500:
+ *         description: Internal server error.
+ */
+userRouter.get('/profile', async (req: Request, res: Response, next: NextFunction) => {
+    const token = req.headers['authorization']?.split(' ')[1]; // Get the token from the header
+    if (!token) {
+        return res.status(401).json({ message: 'No token provided.' });
+    }
+
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET) as { email: string }; // Decode the token
+        const user = await userService.getUserByEmail(decoded.email); // Retrieve user by email
+        res.status(200).json(user);
+    } catch (error) {
+        console.error('Error fetching profile:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
 
 export { userRouter };

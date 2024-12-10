@@ -24,6 +24,9 @@ export default function Header() {
             <nav>
                 {isLoggedIn ? (
                     <>
+                        <Link href="/account" passHref>
+                            <button className="btn btn-primary me-2">Account</button>
+                        </Link>
                         <Link href="/buy-tickets" passHref>
                             <button className="btn btn-success me-2">Buy Tickets</button>
                         </Link>

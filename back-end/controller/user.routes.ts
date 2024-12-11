@@ -33,6 +33,9 @@
 import express, { NextFunction, Request, Response } from 'express';
 import userService from '../service/user.service';
 import jwt from 'jsonwebtoken';
+import {authenticateUser} from '../middleware/authenticateUser';
+import { AuthenticatedRequest } from '../types/express';
+import { User } from '../model/user';
 
 const userRouter = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'F_wMoWC2jXN2cW2l-aLRtiNNShI9SfVPeEKXg5olAUQ';
@@ -211,7 +214,13 @@ userRouter.post('/login', async (req: Request, res: Response, next: NextFunction
         const isValidUser = await userService.verifyUserCredentials(email, password);
 
         if (isValidUser) {
-            const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: '1h' });
+            const user = await userService.getUserByEmail(email);
+            if(!user) {
+                return res.status(401).json({ message: 'Invalid email or password.' });
+            }
+            console.log('User at login:', user); // Add this log
+            console.log('User ID at login:', user.getId()); // Add this log
+            const token = jwt.sign({ id: user.getId(), email: email }, JWT_SECRET, { expiresIn: '1h' });
             return res.status(200).json({ message: 'Login successful.', token });
         }
 
@@ -244,19 +253,21 @@ userRouter.post('/login', async (req: Request, res: Response, next: NextFunction
  *       500:
  *         description: Internal server error.
  */
-userRouter.get('/profile', async (req: Request, res: Response, next: NextFunction) => {
-    const token = req.headers['authorization']?.split(' ')[1]; // Get the token from the header
-    if (!token) {
-        return res.status(401).json({ message: 'No token provided.' });
-    }
-
+userRouter.get('/profile', authenticateUser, async (
+    req: AuthenticatedRequest, 
+    res: Response, 
+    next: NextFunction
+    ) => {
     try {
-        const decoded = jwt.verify(token, JWT_SECRET) as { email: string }; // Decode the token
-        const user = await userService.getUserByEmail(decoded.email); // Retrieve user by email
-        res.status(200).json(user);
+        if (!req.user) {
+            return res.status(401).json({ message: 'User not authenticated' });
+        }
+        console.log('User from request:', req.user);
+        const user = req.user;
+        res.json(req.user);
     } catch (error) {
         console.error('Error fetching profile:', error);
-        res.status(500).json({ message: 'Internal server error' });
+        res.status(500).json({ message: 'Failed to fetch user profile' });
     }
 });
 

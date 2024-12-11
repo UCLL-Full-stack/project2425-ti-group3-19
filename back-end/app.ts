@@ -12,7 +12,13 @@ const app = express();
 dotenv.config();
 const port = process.env.APP_PORT || 3000;
 
-app.use(cors());
+app.use(cors({
+    origin: ['http://localhost:8080', 'http://localhost:3000'], // Add both frontend and backend URLs
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 app.use(bodyParser.json());
 
 app.use('/users', userRouter);
@@ -20,6 +26,11 @@ app.use('/orders', orderRouter);
 
 app.get('/status', (req, res) => {
     res.json({ message: 'Back-end is running...' });
+});
+
+app.get('/test', (req, res) => {
+    console.log('Test endpoint hit');
+    res.json({ message: 'Test endpoint working' });
 });
 
 const swaggerOpts = {

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 
 interface User {
+    id: number;
     firstName: string;
     lastName: string;
     email: string;
@@ -23,22 +24,28 @@ export default function AccountPage() {
 
         const fetchUserData = async () => {
             try {
+                console.log('Fetching user data...');
                 console.log('API URL:', process.env.NEXT_PUBLIC_API_URL + '/users/profile');
+                console.log('Token exists:', !!token);
                 const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/users/profile', {
                     method: 'GET',
                     headers: {
-                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
                     },
                 });
-
+                console.log('Response status:', res.status);
+                var error;
                 if (!res.ok) {
-                    throw new Error('Failed to fetch user data');
+                    const errorData = await res.json();
+                    error = errorData;
+                    throw new Error(errorData.message);
                 }
-
                 const data = await res.json();
+                console.log('Received data:', data);
                 setUser(data);
             } catch (err) {
-                setError('Failed to fetch user data');
+                setError((err as Error).message);
             } finally {
                 setLoading(false);
             }
@@ -52,17 +59,18 @@ export default function AccountPage() {
     }
 
     if (error) {
-        return <div>{error}</div>;
+        return <div>{error}</div>; // Display error message if fetching fails
     }
 
     return (
         <div>
-            <h1>Your Account</h1>
+            <h1>User Profile</h1>
             {user && (
                 <div>
-                    <p><strong>Name:</strong> {user.firstName} {user.lastName}</p>
-                    <p><strong>Email:</strong> {user.email}</p>
-                    <p><strong>Role:</strong> {user.role}</p>
+                    <p>First Name: {user.firstName}</p>
+                    <p>Last Name: {user.lastName}</p>
+                    <p>Email: {user.email}</p>
+                    <p>Role: {user.role}</p>
                 </div>
             )}
         </div>

@@ -6,3 +6,71 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model Beurtenkaart {
+  id        Int      @id @default(autoincrement())
+  beurten   Int
+  price     Float
+  valid     Boolean
+  startDate DateTime
+  endDate   DateTime
+  order     Order    @relation(fields: [orderId], references: [id])
+  orderId   Int
+}
+
+model Order {
+  id             Int          @id @default(autoincrement())
+  orderDate      DateTime
+  product        String
+  price          Float
+  user           User         @relation(fields: [userId], references: [id])
+  userId         Int
+  promotions     Promotion[]  @relation("OrderPromotions")
+  orderReferentie String
+  beurtenkaarten Beurtenkaart[]
+  subscriptions  Subscription[]
+  tickets        Ticket[]
+}
+
+model Promotion {
+  id            Int      @id @default(autoincrement())
+  Code          String
+  IsActive      Boolean
+  DiscountAmount Float
+  orders        Order[]  @relation("OrderPromotions")
+}
+
+model Subscription {
+  id        Int      @id @default(autoincrement())
+  region    String
+  subtype   String
+  startDate DateTime
+  endDate   DateTime
+  order     Order    @relation(fields: [orderId], references: [id])
+  orderId   Int
+}
+
+model Ticket {
+  id           Int      @id @default(autoincrement())
+  date         String
+  price        Float
+  startStation String
+  desStation   String
+  order        Order    @relation(fields: [orderId], references: [id])
+  orderId      Int
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  firstName String
+  lastName  String
+  email     String   @unique
+  password  String
+  role      Role     @default(user)
+  orders    Order[]
+}
+
+enum Role {
+  user
+  admin
+}

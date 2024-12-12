@@ -253,6 +253,7 @@ userRouter.get('/profile', async (req: Request, res: Response, next: NextFunctio
     try {
         const decoded = jwt.verify(token, JWT_SECRET) as { email: string }; // Decode the token
         const user = await userService.getUserByEmail(decoded.email); // Retrieve user by email
+        console.log(decoded.email)
         res.status(200).json(user);
     } catch (error) {
         console.error('Error fetching profile:', error);

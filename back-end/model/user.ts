@@ -1,12 +1,15 @@
+import { User as PrismaUser } from '@prisma/client';
 import { Role } from '../types';
 
 export class User {
-    private id?: number;
-    private firstName: string;
-    private lastName: string;
-    private email: string;
-    private password: string;
-    private role?: Role;
+    readonly id?: number;
+    readonly firstName: string;
+    readonly lastName: string;
+    readonly email: string;
+    readonly password: string;
+    readonly role: Role;
+    readonly createdAt?: Date;
+    readonly updatedAt?: Date;
 
     constructor(user: {
         id?: number;
@@ -15,15 +18,18 @@ export class User {
         email: string;
         password: string;
         role?: Role;
+        createdAt?: Date;
+        updatedAt?: Date;
     }) {
         this.validate(user);
-
         this.id = user.id;
         this.firstName = user.firstName;
         this.lastName = user.lastName;
         this.email = user.email;
         this.password = user.password;
         this.role = user.role ?? 'user';
+        this.createdAt = user.createdAt;
+        this.updatedAt = user.updatedAt;
     }
 
     getId(): number | undefined {
@@ -33,6 +39,7 @@ export class User {
     getFirstName(): string {
         return this.firstName;
     }
+
     getLastName(): string {
         return this.lastName;
     }
@@ -45,7 +52,7 @@ export class User {
         return this.password;
     }
 
-    getRole(): Role | undefined {
+    getRole(): Role {
         return this.role;
     }
 
@@ -71,10 +78,36 @@ export class User {
 
     equals(user: User): boolean {
         return (
-            this.firstName === user.getFirstName() &&
-            this.lastName === user.getLastName() &&
-            this.email === user.getEmail() &&
-            this.password === user.getPassword()
+            this.id === user.id &&
+            this.firstName === user.firstName &&
+            this.lastName === user.lastName &&
+            this.email === user.email &&
+            this.password === user.password &&
+            this.role === user.role &&
+            this.createdAt === user.createdAt &&
+            this.updatedAt === user.updatedAt
         );
+    }
+
+    static from({
+        id,
+        firstName,
+        lastName,
+        email,
+        password,
+        role,
+        createdAt,
+        updatedAt,
+    }: PrismaUser): User {
+        return new User({
+            id,
+            firstName,
+            lastName,
+            email,
+            password,
+            role,
+            createdAt,
+            updatedAt,
+        });
     }
 }

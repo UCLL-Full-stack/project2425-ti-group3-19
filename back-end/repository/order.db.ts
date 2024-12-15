@@ -1,70 +1,83 @@
 import { Order } from '../model/order';
-import { Promotion } from '../model/promotion';
-import { User } from '../model/user';
 import {v4 as uuidv4} from "uuid"; // Import User type
-
-const orders: Order[] = []; // In-memory storage for orders
+import database from '../util/database';
+import { User } from '../model/user';
+import { Promotion } from '../model/promotion';
 
 // Function to save a new order
-const saveOrder = (orderData: {
+const saveOrder = async (orderData: {
     orderDate: Date;
     product: string;
     price: number;
-    user: User;
-    promotions: Promotion[];
+    user: User; // Accept the full User object
+    promotions: Promotion[]; // Use promotionIds to connect promotions
     orderReferentie?: string;
-}): Order => {
-
+}): Promise<Order> => {
     const parsedOrderDate = new Date(orderData.orderDate);
 
     if (isNaN(parsedOrderDate.getTime())) {
         throw new Error('Invalid order date');
     }
 
-    const orderReferentie = uuidv4();
+    const orderReferentie = orderData.orderReferentie || uuidv4();
 
-    // Create a new order instance
-    const newOrder = new Order({
-        orderDate: parsedOrderDate,
-        product: orderData.product,
-        price: orderData.price,
-        user: orderData.user, // Use the full user object passed in
-        promotions: orderData.promotions,
-        orderReferentie: orderReferentie,
-    });
-
-    // Optionally validate the new order data
-    try {
-        newOrder.validate({
+    // Save the new order in the database
+    const createdOrder = await database.order.create({
+        data: {
             orderDate: parsedOrderDate,
             product: orderData.product,
             price: orderData.price,
-            user: orderData.user, // Pass the full user object
-            promotions: orderData.promotions,
-            orderReferentie: orderReferentie,
-        });
-    } catch (validationError) {
-        throw new Error(`Validation error: ${(validationError as Error).message}`);
-    }
+            user: {
+                connect: { id: orderData.user.getId() }, // Connect using the user's ID
+            },
+            orderReferentie,
+            promotions: {
+                connect: orderData.promotions.map((promotion) => ({
+                    id: promotion.getId(), // Connect using each promotion's ID
+                })),
+            },
+        },
+        include: {
+            user: true, // Include the user relation in the returned object
+            promotions: true, // Include the promotions relation
+        },
+    });
 
-    // Assign a unique ID to the order
-    newOrder['id'] = orders.length + 1;
-
-    // Add the new order to the orders array
-    orders.push(newOrder);
-
-    return newOrder;
+    // Convert the Prisma order to the domain Order model
+    return Order.from({
+        ...createdOrder,
+        user: createdOrder.user,
+        promotions: createdOrder.promotions,
+    });
 };
 
 // Function to retrieve an order by ID
-const getOrderById = (id: number): Order | null => {
-    const order = orders.find(order => order.getOrderId() === id);
-    return order || null;
+const getOrderById = async ({ id }: { id: number }): Promise<Order | null> => {
+    try {
+        const orderPrisma = await database.order.findUnique({
+            where: { id },
+        });
+
+        return orderPrisma ? Order.from(orderPrisma) : null;
+    } catch (error) {
+        console.error(error);
+        throw new Error('Database error. See server log for details.');
+    }
 };
 
+
 // Function to retrieve all orders
-const getAllOrders = (): Order[] => {
-    return orders;
+const getAllOrders = async ():Promise<Order[]> => {
+    try {
+        const ordersPrisma = await database.order.findMany({
+            include: {user: true, promotions: true,},
+        });
+        return ordersPrisma.map((ordersPrisma)=> Order.from(ordersPrisma))
+    } catch (error) {
+        console.error(error);
+        throw new Error("Database error. See server log for details.")
+    }
+
 };
 
 // Export the repository functions as an object for easy import

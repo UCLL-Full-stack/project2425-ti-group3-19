@@ -1,4 +1,4 @@
-import { User as PrismaUser } from '@prisma/client';
+import { User as UserPrisma } from '@prisma/client';
 import { Role } from '../types';
 
 export class User {
@@ -61,6 +61,7 @@ export class User {
         lastName: string;
         email: string;
         password: string;
+        
     }) {
         if (!user.firstName?.trim()) {
             throw new Error('First name is required');
@@ -98,7 +99,7 @@ export class User {
         role,
         createdAt,
         updatedAt,
-    }: PrismaUser): User {
+    }: UserPrisma) {
         return new User({
             id,
             firstName,

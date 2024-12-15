@@ -1,4 +1,4 @@
-import { Beurtenkaart as BeurtenkaartPrisma, PrismaClient } from '@prisma/client';
+import { Beurtenkaart as BeurtenkaartPrisma} from '@prisma/client';
 
 export class Beurtenkaart {
     private id: number; // Not optional
@@ -101,7 +101,7 @@ export class Beurtenkaart {
         );
     }
 
-    static fromPrisma(beurtenkaartPrisma: BeurtenkaartPrisma): Beurtenkaart {
+    static from(beurtenkaartPrisma: BeurtenkaartPrisma): Beurtenkaart {
         return new Beurtenkaart({
             id: beurtenkaartPrisma.id,
             beurten: beurtenkaartPrisma.beurten,

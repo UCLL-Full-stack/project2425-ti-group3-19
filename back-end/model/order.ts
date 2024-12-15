@@ -1,14 +1,21 @@
+import {
+    Order as PrismaOrder,
+    User as PrismaUser,
+    Promotion as PrismaPromotion
+} from '@prisma/client';
 import { User } from './user';
-import {Promotion} from './promotion';
+import { Promotion } from './promotion';
 
 export class Order {
-    private id?: number;
-    private orderDate: Date;
-    private product: string;
-    private price: number;
-    private user: User;
-    private promotions: Promotion[];
-    private orderReferentie: string;
+    readonly id?: number;
+    readonly orderDate: Date;
+    readonly product: string;
+    readonly price: number;
+    readonly user: User;
+    readonly promotions: Promotion[];
+    readonly orderReferentie: string;
+    readonly createdAt?: Date;
+    readonly updatedAt?: Date;
 
     constructor(order: {
         id?: number;
@@ -18,10 +25,10 @@ export class Order {
         user: User;
         promotions: Promotion[];
         orderReferentie: string;
-
+        createdAt?: Date;
+        updatedAt?: Date;
     }) {
         this.validate(order);
-
         this.id = order.id;
         this.orderDate = order.orderDate;
         this.product = order.product;
@@ -29,32 +36,28 @@ export class Order {
         this.user = order.user;
         this.promotions = order.promotions;
         this.orderReferentie = order.orderReferentie;
+        this.createdAt = order.createdAt;
+        this.updatedAt = order.updatedAt;
     }
 
     getOrderDate(): Date {
         return this.orderDate;
     }
-
     getProduct(): string {
         return this.product;
     }
-
     getPrice(): number {
         return this.price;
     }
-
     getOrderId(): number | undefined {
         return this.id;
     }
-
     getUser(): User {
         return this.user;
     }
-
     getPromotions(): Promotion[] {
         return this.promotions;
     }
-
     getorderReferentie(): string {
         return this.orderReferentie;
     }
@@ -86,11 +89,47 @@ export class Order {
 
     equals(order: Order): boolean {
         return (
-            this.product === order.getProduct() &&
-            this.price === order.getPrice() &&
-            this.user.getId() === order.getUser().getId() && // Compare by User ID
-            this.promotions.every((promotion, index) => promotion.equals(order.getPromotions()[index])) &&
-            this.orderReferentie === order.getorderReferentie()
+            this.id === order.id &&
+            this.orderDate === order.orderDate &&
+            this.product === order.product &&
+            this.price === order.price &&
+            this.user.equals(order.user) &&
+            this.promotions.every((promotion, index) => promotion.equals(order.promotions[index])) &&
+            this.orderReferentie === order.orderReferentie &&
+            this.createdAt === order.createdAt &&
+            this.updatedAt === order.updatedAt
         );
     }
+
+    static from({
+        id,
+        orderDate,
+        product,
+        price,
+        orderReferentie,
+        createdAt,
+        updatedAt,
+        user,
+        promotions = [],
+    }: PrismaOrder & {
+        user?: PrismaUser; // Remove the optional modifier
+        promotions?: PrismaPromotion[]
+    }): Order {
+        if (!user) {
+            throw new Error("User is required to create an Order instance.");
+        }
+        return new Order({
+            id,
+            orderDate,
+            product,
+            price,
+            user: User.from(user), // Safe to call as user is guaranteed to exist
+            promotions: promotions.map((promotion) => Promotion.from(promotion)),
+            orderReferentie,
+            createdAt,
+            updatedAt,
+        });
+    }
+
+
 }

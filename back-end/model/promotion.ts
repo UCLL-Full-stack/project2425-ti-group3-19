@@ -1,12 +1,17 @@
-import {Order} from './order';
-
+import { 
+    Promotion as PrismaPromotion, 
+    Order as PrismaOrder 
+} from '@prisma/client';
+import { Order } from './order';
 
 export class Promotion {
-    private id?: number;
-    private Code: string;
-    private IsActive: boolean;
-    private DiscountAmount: number;
-    private orders: Order[];
+    readonly id?: number;
+    readonly Code: string;
+    readonly IsActive: boolean;
+    readonly DiscountAmount: number;
+    readonly orders: Order[];
+    readonly createdAt?: Date;
+    readonly updatedAt?: Date;
 
     constructor(promotion: {
         id?: number;
@@ -14,14 +19,17 @@ export class Promotion {
         IsActive: boolean;
         DiscountAmount: number;
         orders: Order[];
+        createdAt?: Date;
+        updatedAt?: Date;
     }) {
         this.validate(promotion);
-
         this.Code = promotion.Code;
         this.IsActive = promotion.IsActive;
         this.DiscountAmount = promotion.DiscountAmount;
         this.orders = promotion.orders;
         this.id = promotion.id;
+        this.createdAt = promotion.createdAt;
+        this.updatedAt = promotion.updatedAt;
     }
 
     getId(): number | undefined {
@@ -31,9 +39,11 @@ export class Promotion {
     getCode(): string {
         return this.Code;
     }
+
     getIsActive(): boolean {
         return this.IsActive;
     }
+
     getDiscountAmount(): number {
         return this.DiscountAmount;
     }
@@ -42,11 +52,16 @@ export class Promotion {
         return this.orders;
     }
 
-    validate(promotion: { Code: string; IsActive: boolean; DiscountAmount: number; orders: Order[];}) {
+    validate(promotion: { 
+        Code: string; 
+        IsActive: boolean; 
+        DiscountAmount: number; 
+        orders: Order[];
+    }) {
         if (!promotion.Code) {
             throw new Error('Code is required');
         }
-        if (!promotion.IsActive) {
+        if (promotion.IsActive === undefined) {
             throw new Error('IsActive is required');
         }
         if (!promotion.DiscountAmount) {
@@ -59,11 +74,35 @@ export class Promotion {
 
     equals(promotion: Promotion): boolean {
         return (
-            this.id === promotion.getId() &&
-            this.Code === promotion.getCode() &&
-            this.IsActive === promotion.getIsActive() &&
-            this.DiscountAmount === promotion.getDiscountAmount() &&
-            this.orders.every((order, index) => order.equals(promotion.getOrders()[index]))
+            this.id === promotion.id &&
+            this.Code === promotion.Code &&
+            this.IsActive === promotion.IsActive &&
+            this.DiscountAmount === promotion.DiscountAmount &&
+            this.orders.every((order, index) => order.equals(promotion.orders[index])) &&
+            this.createdAt === promotion.createdAt &&
+            this.updatedAt === promotion.updatedAt
         );
+    }
+
+    static from({
+        id,
+        Code,
+        IsActive,
+        DiscountAmount,
+        orders = [], // Provide a default empty array
+        createdAt,
+        updatedAt,
+    }: PrismaPromotion & { 
+        orders?: PrismaOrder[] 
+    }): Promotion {
+        return new Promotion({
+            id,
+            Code,
+            IsActive,
+            DiscountAmount,
+            orders: orders.map((order) => Order.from(order)),
+            createdAt,
+            updatedAt,
+        });
     }
 }

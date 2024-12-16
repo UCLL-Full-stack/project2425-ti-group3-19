@@ -1,20 +1,20 @@
 import { Order } from './order'; 
 
 export class Ticket {
-    private id?: number;
-    private date: string;
+    private id: number;
+    private date: Date;
     private price: number;
     private startStation: string;
     private desStation: string;
-    private orderId: number;
+    private orderId: string;
 
     constructor(ticket: {
-        id?: number;
-        date: string;
+        id: number;
+        date: Date;
         price: number;
         startStation: string;
         desStation: string;
-        order: Order;
+        orderId: string;
     }) {
         this.validate(ticket);
 
@@ -23,14 +23,14 @@ export class Ticket {
         this.price = ticket.price;
         this.startStation = ticket.startStation;
         this.desStation = ticket.desStation;
-        this.orderId = ticket.order.getOrderId()!;
+        this.orderId = ticket.orderId;
     }
 
     getId(): number | undefined {
         return this.id;
     }
 
-    getDate(): string {
+    getDate(): Date {
         return this.date;
     }
 
@@ -46,22 +46,22 @@ export class Ticket {
         return this.desStation;
     }
 
-    getOrderId(): number {
+    getOrderId(): string {
         return this.orderId;
     }
 
     validate(ticket: {
         id?: number;
-        date: string;
+        date: Date;
         price: number;
         startStation: string;
         desStation: string;
-        order: Order;
+        orderId: string;
     }) {
         if (ticket.id !== undefined && ticket.id <= 0) {
             throw new Error('ID must be a positive number if provided');
         }
-        if (!ticket.date?.trim()) {
+        if (ticket.date instanceof Date) {
             throw new Error('Date is required');
         }
         if (ticket.price <= 0) {
@@ -73,7 +73,7 @@ export class Ticket {
         if (!ticket.desStation?.trim()) {
             throw new Error('Destination Station is required');
         }
-        if (!ticket.order.getOrderId()) {
+        if (!ticket.orderId?.trim()) {
             throw new Error('Order ID is required');
         }
     }

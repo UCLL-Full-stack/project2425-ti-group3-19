@@ -6,7 +6,7 @@ export class Subscription {
     private subtype: string;
     private startDate: Date;
     private endDate: Date;
-    private orderId: number;
+    private orderId: string;
 
     constructor(subscription: {
         id: number;
@@ -14,7 +14,7 @@ export class Subscription {
         subtype: string;
         startDate: Date;
         endDate: Date;
-        order: Order;
+        orderId: string;
     }) {
         this.validate(subscription);
 
@@ -23,7 +23,7 @@ export class Subscription {
         this.subtype = subscription.subtype;
         this.startDate = subscription.startDate;
         this.endDate = subscription.endDate;
-        this.orderId = subscription.order.getOrderId()!;
+        this.orderId = subscription.orderId;
     }
 
     getId(): number {
@@ -46,7 +46,7 @@ export class Subscription {
         return this.endDate;
     }
 
-    getOrderId(): number {
+    getOrderId(): string {
         return this.orderId;
     }
 
@@ -56,7 +56,7 @@ export class Subscription {
         subtype: string;
         startDate: Date;
         endDate: Date;
-        order: Order;
+        orderId: string;
     }) {
         if (subscription.id <= 0) {
             throw new Error('ID must be a positive number');
@@ -67,13 +67,13 @@ export class Subscription {
         if (!subscription.subtype?.trim()) {
             throw new Error('Subtype is required');
         }
-        if (!(subscription.startDate instanceof Date)) {
+        if ((subscription.startDate instanceof Date)) {
             throw new Error('StartDate must be a valid date');
         }
-        if (!(subscription.endDate instanceof Date)) {
+        if ((subscription.endDate instanceof Date)) {
             throw new Error('EndDate must be a valid date');
         }
-        if (subscription.order.getOrderId() === undefined) {
+        if (subscription.orderId === undefined) {
             throw new Error('Order ID is required');
         }
     }
@@ -83,8 +83,8 @@ export class Subscription {
             this.id === subscription.getId() &&
             this.region === subscription.getRegion() &&
             this.subtype === subscription.getSubtype() &&
-            this.startDate.getTime() === subscription.getStartDate().getTime() &&
-            this.endDate.getTime() === subscription.getEndDate().getTime() &&
+            this.startDate=== subscription.getStartDate() &&
+            this.endDate === subscription.getEndDate() &&
             this.orderId === subscription.getOrderId()
         );
     }

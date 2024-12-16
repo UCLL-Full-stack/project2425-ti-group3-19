@@ -8,7 +8,7 @@ export class Beurtenkaart {
     private valid: boolean;
     private startDate: Date;
     private endDate: Date;
-    private orderId: number;
+    private orderId: string;
 
     constructor(beurtenkaart: {
         id: number;
@@ -17,7 +17,7 @@ export class Beurtenkaart {
         valid: boolean;
         startDate: Date;
         endDate: Date;
-        order: Order;
+        orderId: string;
     }) {
         this.validate(beurtenkaart);
 
@@ -27,7 +27,7 @@ export class Beurtenkaart {
         this.valid = beurtenkaart.valid;
         this.startDate = beurtenkaart.startDate;
         this.endDate = beurtenkaart.endDate;
-        this.orderId = beurtenkaart.order.getOrderId()!;
+        this.orderId = beurtenkaart.orderId;
     }
 
     getId(): number {
@@ -54,7 +54,7 @@ export class Beurtenkaart {
         return this.endDate;
     }
 
-    getOrderId(): number {
+    getOrderId(): string {
         return this.orderId;
     }
 
@@ -65,7 +65,7 @@ export class Beurtenkaart {
         valid: boolean;
         startDate: Date;
         endDate: Date;
-        order: Order;
+        orderId: string;
     }) {
         if (beurtenkaart.id <= 0) {
             throw new Error('ID must be a positive number');
@@ -85,7 +85,7 @@ export class Beurtenkaart {
         if (beurtenkaart.endDate < beurtenkaart.startDate) {
             throw new Error('EndDate cannot be before StartDate');
         }
-        if (beurtenkaart.order.getOrderId() === undefined) {
+        if (beurtenkaart.orderId === undefined) {
             throw new Error('Order ID is required');
         }
     }

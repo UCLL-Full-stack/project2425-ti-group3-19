@@ -12,7 +12,7 @@ const saveOrder = (orderData: {
     price: number;
     user: User;
     promotions: Promotion[];
-    orderReferentie?: string;
+    orderReferentie: string;
 }): Order => {
 
     const parsedOrderDate = new Date(orderData.orderDate);
@@ -21,8 +21,6 @@ const saveOrder = (orderData: {
         throw new Error('Invalid order date');
     }
 
-    const orderReferentie = uuidv4();
-
     // Create a new order instance
     const newOrder = new Order({
         orderDate: parsedOrderDate,
@@ -30,7 +28,7 @@ const saveOrder = (orderData: {
         price: orderData.price,
         user: orderData.user, // Use the full user object passed in
         promotions: orderData.promotions,
-        orderReferentie: orderReferentie,
+        orderReferentie: orderData.orderReferentie,
     });
 
     // Optionally validate the new order data
@@ -41,7 +39,7 @@ const saveOrder = (orderData: {
             price: orderData.price,
             user: orderData.user, // Pass the full user object
             promotions: orderData.promotions,
-            orderReferentie: orderReferentie,
+            orderReferentie: orderData.orderReferentie,
         });
     } catch (validationError) {
         throw new Error(`Validation error: ${(validationError as Error).message}`);
@@ -67,9 +65,15 @@ const getAllOrders = (): Order[] => {
     return orders;
 };
 
+const getUserOrders = (userId: number): Order[] => {
+    return orders.filter(order => order.getUser().getId() === userId);
+};
+
+
 // Export the repository functions as an object for easy import
 export default {
     saveOrder,
     getOrderById,
     getAllOrders,
+    getUserOrders,
 };

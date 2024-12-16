@@ -14,9 +14,11 @@ export default function AccountPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const router = useRouter();
+    const [token, setToken] = useState<string | null>(null);
 
     useEffect(() => {
-        const token = localStorage.getItem('authToken');
+        const tokensto = localStorage.getItem('authToken');
+        setToken(tokensto);
         if (!token) {
             router.push('/login'); // Redirect to login if no token is found
             return;

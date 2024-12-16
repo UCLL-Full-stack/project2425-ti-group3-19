@@ -258,18 +258,30 @@ userRouter.get('/profile', authenticateUser, async (
     res: Response, 
     next: NextFunction
     ) => {
+    console.log("test");
     try {
         if (!req.user) {
             return res.status(401).json({ message: 'User not authenticated' });
         }
         console.log('User from request:', req.user);
         const user = req.user;
-        res.json(req.user);
+        res.json(user);
     } catch (error) {
         console.error('Error fetching profile:', error);
         res.status(500).json({ message: 'Failed to fetch user profile' });
     }
 });
 
+userRouter.get('/current-user', authenticateUser, async (
+    req: AuthenticatedRequest, 
+    res: Response, 
+    next: NextFunction
+    ) => {
+        if (!req.user) {
+            return res.status(401).json({ message: 'User not authenticated' });
+        }
+        const userId = req.user.getId();
+        res.json({ id: userId });
+});
 
 export { userRouter };

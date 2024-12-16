@@ -7,6 +7,9 @@ import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 import { userRouter } from './controller/user.routes';
 import { orderRouter } from './controller/order.routes';
+import { subRouter } from './controller/subscription.routes';
+import { beurtRouter } from './controller/beurtenkaart.routes';
+import { ticketRouter } from './controller/ticket.routes';
 
 const app = express();
 dotenv.config();
@@ -23,14 +26,12 @@ app.use(bodyParser.json());
 
 app.use('/users', userRouter);
 app.use('/orders', orderRouter);
+app.use('/subscriptions', subRouter);
+app.use('/beurtenkaarten', beurtRouter);
+app.use('/tickets', ticketRouter);
 
 app.get('/status', (req, res) => {
     res.json({ message: 'Back-end is running...' });
-});
-
-app.get('/test', (req, res) => {
-    console.log('Test endpoint hit');
-    res.json({ message: 'Test endpoint working' });
 });
 
 const swaggerOpts = {

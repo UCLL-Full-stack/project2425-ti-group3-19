@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Header from '@/components/header';
 import Select from 'react-select';
+import {getUserIdFromToken} from '@/services/jwtdecode';
 
 export default function BuyTickets() {
     const [selectedOption, setSelectedOption] = useState('Ticket');
@@ -16,6 +17,7 @@ export default function BuyTickets() {
     const [currentOrderId, setCurrentOrderId] = useState<number | null>(null);
     const router = useRouter();
     const [token, setToken] = useState<string | null>(null);
+    const [userId, setUserId] = useState<number | null>(null);
 
     const regions = [
         { value: 'north', label: 'North' },
@@ -33,9 +35,12 @@ export default function BuyTickets() {
     useEffect(() => {
         const token = localStorage.getItem('authToken');
         setToken(token);
+        console.log('Token in buy tickets:', token);
         if (!token) {
             router.push('/login');
         }
+        const id = getUserIdFromToken(token as string);
+        setUserId(id);
     }, [router]);
 
 
@@ -49,7 +54,24 @@ export default function BuyTickets() {
         setCurrentOrderId(null);
     };
 
-    const handleAddOrUpdateOrder = () => {
+    const fetchUserOrders = async () => {
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/orders/user-orders?userId=${userId}`, {
+                method: 'GET',
+                headers: {  
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
+            const orders = await response.json();
+            return orders;
+        } catch (error) {
+            console.error("Error fetching user orders:", error);
+            return [];
+        }
+    };
+
+    const handleAddOrUpdateOrder = async () => {
         if (
             (selectedOption === 'Ticket' && (!beginStation || !endStation)) ||
             (selectedOption === 'Subscription' && (!subscriptionLength || !region)) ||
@@ -59,9 +81,40 @@ export default function BuyTickets() {
             setSuccessMessage('');
             return;
         }
+        console.log('User ID in frontend buy tickets:', userId);
+
+        const orders = await fetchUserOrders();
+        console.log('Orders in frontend buy tickets:', orders);
+        let matching = false;
+
+        if (selectedOption === 'Subscription') {
+            console.log('subscription');
+            const hasMatchingSubscription = async () => {
+                for (const order of orders) {
+                    if (order.product === 'Subscription') {
+                        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/subscriptions/${order.orderReferentie}`);
+                        if (response.ok) {
+                            const subscription = await response.json();
+                            console.log('Subscription:', subscription);
+                            console.log('Region:', subscription.region);
+                            if (subscription.region === region?.label) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+                return false;
+            }; 
+
+            matching = await hasMatchingSubscription();
+            console.log('Matching:', matching);
+            if (matching) {
+                setErrorMessage('You already have a subscription for this region.');
+                return;
+            }
+        }
 
         const orderDate = new Date(); // This will create a Date object (not a string)
-
         const orderData = {
             id: currentOrderId ?? orderList.length + 1,
             product: selectedOption,

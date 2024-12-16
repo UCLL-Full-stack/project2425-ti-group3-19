@@ -112,7 +112,7 @@ export class Order {
         user,
         promotions = [],
     }: PrismaOrder & {
-        user?: PrismaUser; // Remove the optional modifier
+        user?: PrismaUser;
         promotions?: PrismaPromotion[]
     }): Order {
         if (!user) {
@@ -123,7 +123,7 @@ export class Order {
             orderDate,
             product,
             price,
-            user: User.from(user), // Safe to call as user is guaranteed to exist
+            user: User.from(user),
             promotions: promotions.map((promotion) => Promotion.from(promotion)),
             orderReferentie,
             createdAt,

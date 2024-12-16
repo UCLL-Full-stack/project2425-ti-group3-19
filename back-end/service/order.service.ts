@@ -25,6 +25,8 @@ const createOrder = async (orderData: {
         orderDate: parsedOrderDate,
     });
 
+    
+
     // Save the order using the repository and return the saved order
     return orderRepository.saveOrder({
         orderDate: order.getOrderDate(),
@@ -53,7 +55,7 @@ const createMultipleOrders = async (ordersData: {
 };
 
 //Method to get all orders
-const getAllOrders = (): Order[] => {
+const getAllOrders = async(): Promise<Order[]> => {
     return orderRepository.getAllOrders();
 };
 

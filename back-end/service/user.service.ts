@@ -6,43 +6,43 @@ import { Order } from '../model/order';
 import orderService from './order.service';
 import {v4 as uuidv4} from "uuid";
 
-const getAllUsers = (): User[] => {
+const getAllUsers = async(): Promise<User[]> => {
     return userRepository.getAllUsers();
 };
 
-const getUserById = (id: number): User => {
-    const user = userRepository.getUserById(id);
+const getUserById = async (id: number): Promise<User> => {
+    const user = await userRepository.getUserById({ id });
     if (!user) {
         throw new Error(`User with id ${id} does not exist.`);
     }
     return user;
 };
 
-const getUserByFirstName = (firstName: string): User => {
-    const user = userRepository.getUserByFirstName(firstName);
+const getUserByFirstName = async (firstName: string): Promise<User> => {
+    const user = await userRepository.getUserByFirstName({ firstName });
     if (!user) {
         throw new Error(`User with first name ${firstName} does not exist.`);
     }
     return user;
 };
 
-const getUserByLastName = (lastName: string): User => {
-    const user = userRepository.getUserByLastName(lastName);
+const getUserByLastName = async (lastName: string): Promise<User> => {
+    const user = await userRepository.getUserByLastName({ lastName });
     if (!user) {
         throw new Error(`User with last name ${lastName} does not exist.`);
     }
     return user;
 };
 
-const getUserByEmail = (email: string): User | null => {
-    const user = userRepository.getUserByEmail(email);
-    return user || null; // Return the user if found, otherwise return null
+
+const getUserByEmail = async (email: string): Promise<User | null> => {
+    return await userRepository.getUserByEmail({ email });
 };
 
 
 const createUser = async (userData: { firstName: string; lastName: string; email: string; password: string; role: Role }): Promise<User> => {
     try {
-        const newUser = userRepository.saveUser(userData);
+        const newUser = await userRepository.saveUser(userData);
 
         const orderReferentie = uuidv4();
 
@@ -73,15 +73,15 @@ const createUser = async (userData: { firstName: string; lastName: string; email
     }
 };
 
-async function verifyUserCredentials(email: string, password: string): Promise<boolean> {
-    const user = getUserByEmail(email); // This will now return User or null
+const verifyUserCredentials = async (email: string, password: string): Promise<boolean> => {
+    const user = await getUserByEmail(email); // This will now return User or null
 
     if (user) {
         return user.getPassword() === password; // Direct comparison (not secure for production)
     }
 
     return false; // User not found
-}
+};
 
 
 export default {

@@ -101,15 +101,15 @@ export class Beurtenkaart {
         );
     }
 
-    static from(beurtenkaartPrisma: BeurtenkaartPrisma): Beurtenkaart {
-        return new Beurtenkaart({
-            id: beurtenkaartPrisma.id,
-            beurten: beurtenkaartPrisma.beurten,
-            price: beurtenkaartPrisma.price,
-            valid: beurtenkaartPrisma.valid,
-            startDate: beurtenkaartPrisma.startDate,
-            endDate: beurtenkaartPrisma.endDate,
-            orderId: beurtenkaartPrisma.orderId,
-        });
-    }
+    // static from(beurtenkaartPrisma: BeurtenkaartPrisma): Beurtenkaart {
+    //     return new Beurtenkaart({
+    //         id: beurtenkaartPrisma.id,
+    //         beurten: beurtenkaartPrisma.beurten,
+    //         price: beurtenkaartPrisma.price,
+    //         valid: beurtenkaartPrisma.valid,
+    //         startDate: beurtenkaartPrisma.startDate,
+    //         endDate: beurtenkaartPrisma.endDate,
+    //         orderId: beurtenkaartPrisma.orderId,
+    //     });
+    // }
 }

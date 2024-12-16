@@ -89,7 +89,7 @@ export class Promotion {
         Code,
         IsActive,
         DiscountAmount,
-        orders = [], // Provide a default empty array
+        orders = [],
         createdAt,
         updatedAt,
     }: PrismaPromotion & { 

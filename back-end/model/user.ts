@@ -56,6 +56,13 @@ export class User {
         return this.role;
     }
 
+    getCreatedAt(): Date | undefined{
+        return this.createdAt;
+    }
+    getUpdatedAt(): Date | undefined{
+        return this.updatedAt;
+    }
+
     validate(user: {
         firstName: string;
         lastName: string;

@@ -128,6 +128,7 @@ orderRouter.post('/', authenticateUser, async (
 
 
 orderRouter.get('/user-orders', async (req, res) => {
+    console.log("aaaaa");
     const userId = req.query.userId; // Ensure you have userId in the request
     const orders = await orderService.getUserOrders(Number(userId));
     res.json(orders);

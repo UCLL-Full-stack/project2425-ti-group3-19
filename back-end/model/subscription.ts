@@ -67,10 +67,10 @@ export class Subscription {
         if (!subscription.subtype?.trim()) {
             throw new Error('Subtype is required');
         }
-        if ((subscription.startDate instanceof Date)) {
+        if (!(subscription.startDate instanceof Date)) {
             throw new Error('StartDate must be a valid date');
         }
-        if ((subscription.endDate instanceof Date)) {
+        if (!(subscription.endDate instanceof Date)) {
             throw new Error('EndDate must be a valid date');
         }
         if (subscription.orderId === undefined) {

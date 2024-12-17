@@ -1,4 +1,5 @@
 import { Ticket } from '../model/ticket'; // Assuming you have a Ticket model
+import orderService from '../service/order.service';
 
 const tickets: Ticket[] = [];
 
@@ -19,9 +20,21 @@ const saveTicket = (ticket: Ticket): Ticket => {
     return ticket;
 };
 
+const findTicketsByUserId = async (userId: string): Promise<Ticket[]> => {
+    var userIdN: number = +userId;
+    const orders = await orderService.getUserOrders(userIdN);
+    console.log(orders);
+    const orderIds = orders.map(order => order.getorderReferentie());
+    const userTickets = tickets.filter(ticket =>
+        orderIds.includes(ticket.getOrderId())
+    );
+    return userTickets;
+}
+
 // Export the repository functions as an object for easy import
 export default {
     getAllTickets,
     getTicketById,
     saveTicket,
+    findTicketsByUserId,
 };

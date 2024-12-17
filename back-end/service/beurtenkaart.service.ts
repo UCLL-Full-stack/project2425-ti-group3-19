@@ -13,8 +13,13 @@ const getBeurtenkaartById = async (id: number): Promise<Beurtenkaart | null> => 
     return beurtenkaartRepository.getBeurtenkaartById(id);
 };
 
+const getBeurtenByUserId = async(userId: string): Promise<Beurtenkaart[]> => {
+    return await beurtenkaartRepository.findBeurtenByUserId(userId);
+}
+
 export default {
     createBeurtenkaart,
     getAllBeurtenkaarten,
     getBeurtenkaartById,
+    getBeurtenByUserId,
 };

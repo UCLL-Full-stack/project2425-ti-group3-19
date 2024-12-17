@@ -4,6 +4,17 @@ import express, { NextFunction, Request, Response } from 'express';
 
 const beurtRouter = express.Router();
 
+beurtRouter.get('/beurtuser', async (req, res) => {
+    try {
+        const userId = req.query.userId;
+        console.log(userId);
+        const tickets = await beurtenkaartService.getBeurtenByUserId(userId as string);
+        res.status(200).json(tickets);
+    } catch (error) {
+        res.status(400).json({ message: (error as Error).message });
+    }
+});
+
 // Route to create a new beurtenkaart
 beurtRouter.post('/beurtenkaarten', async (req, res) => {
     try {

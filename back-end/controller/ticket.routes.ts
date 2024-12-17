@@ -4,6 +4,17 @@ import express, { NextFunction, Request, Response } from 'express';
 
 const ticketRouter = express.Router();
 
+ticketRouter.get('/ticketuser', async (req, res) => {
+    try {
+        const userId = req.query.userId;
+        console.log(userId);
+        const tickets = await ticketService.getTicketsByUserId(userId as string);
+        res.status(200).json(tickets);
+    } catch (error) {
+        res.status(400).json({ message: (error as Error).message });
+    }
+});
+
 // Route to create a new ticket
 ticketRouter.post('/', async (req, res) => {
     try {

@@ -17,9 +17,15 @@ const getSubscriptionByReferentie = async (orderReferentie: string) => {
     return await subscriptionRepository.getSubscriptionByReferentie(orderReferentie);
 };
 
+const getSubscriptionsByUserId = async(userId: string): Promise<Subscription[]> => {
+    // Logic to get subscriptions by user ID
+    return await subscriptionRepository.findSubscriptionsByUserId(userId);
+}
+
 export default {
     createSubscription,
     getAllSubscriptions,
     getSubscriptionById,
     getSubscriptionByReferentie,
+    getSubscriptionsByUserId,
 };

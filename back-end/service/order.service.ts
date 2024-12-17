@@ -56,6 +56,7 @@ const createMultipleOrders = async (ordersData: {
     const orderReferentie = uuidv4();
     const orders: Order[] = [];
     for (const data of ordersData) {
+        const orderDate = data.orderDate instanceof Date ? data.orderDate : new Date(data.orderDate);
         let product;
         console.log(data);
         console.log(data.orderDate, typeof data.orderDate);
@@ -63,7 +64,7 @@ const createMultipleOrders = async (ordersData: {
             case 'Ticket':
                 product = new Ticket({
                 id: orders.length + 1,
-                date: data.orderDate,
+                date: orderDate,
                 price: data.price,
                 startStation: data.beginStation,
                 desStation: data.endStation,
@@ -72,24 +73,27 @@ const createMultipleOrders = async (ordersData: {
                 await ticketService.createTicket(product);
                 break;
             case 'Subscription':
+                const endDate = calculateSubscriptionEndDate(orderDate, data.subscriptionLength);
+                if (!endDate) throw new Error('Invalid subscription length');
+
                 product = new Subscription({
                     id: orders.length + 1,
                     region: data.region,
                     subtype: data.subscriptionLength,
-                    startDate: data.orderDate,
-                    endDate: data.orderDate,
+                    startDate: orderDate,
+                    endDate,
                     orderId: orderReferentie,
                 });
                 await subscriptionService.createSubscription(product);
                 break;
-            case 'Beurtenkaart':
+            case '10-Session Card':
                 product = new Beurtenkaart({
                     id: orders.length + 1,
                     valid: true,
                     beurten: 10,
                     price: data.price,
-                    startDate: data.orderDate,
-                    endDate: data.orderDate,
+                    startDate: orderDate,
+                    endDate: orderDate,
                     orderId: orderReferentie,
                 });
                 await beurtenkaartService.createBeurtenkaart(product);
@@ -101,6 +105,29 @@ const createMultipleOrders = async (ordersData: {
         orders.push(order);
     }
     return orders;
+};
+
+const calculateSubscriptionEndDate = (startDate: Date, subscriptionLength: string): Date | null => {
+    const endDate = new Date(startDate);
+
+    switch (subscriptionLength) {
+        case '1 Month':
+            endDate.setMonth(startDate.getMonth() + 1);
+            break;
+        case '3 Months':
+            endDate.setMonth(startDate.getMonth() + 3);
+            break;
+        case '6 Months':
+            endDate.setMonth(startDate.getMonth() + 6);
+            break;
+        case '1 Year':
+            endDate.setFullYear(startDate.getFullYear() + 1);
+            break;
+        default:
+            return null; // Invalid subscription length
+    }
+
+    return endDate;
 };
 
 //Method to get all orders

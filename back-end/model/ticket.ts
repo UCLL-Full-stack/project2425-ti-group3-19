@@ -61,7 +61,7 @@ export class Ticket {
         if (ticket.id !== undefined && ticket.id <= 0) {
             throw new Error('ID must be a positive number if provided');
         }
-        if (ticket.date instanceof Date) {
+        if (!(ticket.date instanceof Date)) {
             throw new Error('Date is required');
         }
         if (ticket.price <= 0) {

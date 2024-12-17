@@ -13,9 +13,14 @@ import ticketRepository from '../repository/ticket.db';
         return ticketRepository.getTicketById(id);
     }
 
+    const getTicketsByUserId = async(userId: string): Promise<Ticket[]> => {
+        return await ticketRepository.findTicketsByUserId(userId);
+    }
+
 
 export default {
     createTicket,
     getAllTickets,
     getTicketById,
+    getTicketsByUserId,
 };

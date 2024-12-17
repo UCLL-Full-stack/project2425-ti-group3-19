@@ -19,6 +19,7 @@ export default function Login() {
 
     // Function to check if user is authenticated by checking for token in localStorage
     function isAuthenticated() {
+        console.log(localStorage.getItem('authToken'));
         return !!localStorage.getItem('authToken'); // Returns true if token exists
     }
 

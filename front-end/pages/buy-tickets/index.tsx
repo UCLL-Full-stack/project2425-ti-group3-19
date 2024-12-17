@@ -128,6 +128,7 @@ export default function BuyTickets() {
 
         if (isEditing && currentOrderId !== null) {
             setOrderList(orderList.map(order => order.id === currentOrderId ? orderData : order));
+            console.log("orderlist here", orderList);
             setSuccessMessage(`${selectedOption} updated successfully!`);
         } else {
             setOrderList([...orderList, orderData]);
@@ -161,6 +162,7 @@ export default function BuyTickets() {
             setSuccessMessage('');
             return;
         }
+        setErrorMessage('something went wrong');
 
         try {
             const response = await fetch(process.env.NEXT_PUBLIC_API_URL + '/orders', {

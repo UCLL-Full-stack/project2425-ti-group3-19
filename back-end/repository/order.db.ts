@@ -3,7 +3,6 @@ import {v4 as uuidv4} from "uuid"; // Import User type
 import database from '../util/database';
 import { User } from '../model/user';
 import { Promotion } from '../model/promotion';
-const orders: Order[] = []; // In-memory storage for orders
 
 // Function to save a new order
 const saveOrder = async (orderData: {
@@ -78,8 +77,23 @@ const getAllOrders = async ():Promise<Order[]> => {
 
 };
 
-const getUserOrders = (userId: number): Order[] => {
-    return orders.filter(order => order.getUser().getId() === userId);
+// Function to retrieve orders for a specific user
+const getUserOrders = async (userId: number): Promise<Order[]> => {
+    try {
+        const userOrdersPrisma = await database.order.findMany({
+            where: { 
+                userId: userId 
+            },
+            include: {
+                user: true,
+                promotions: true
+            }
+        });
+        return userOrdersPrisma.map((orderPrisma) => Order.from(orderPrisma));
+    } catch (error) {
+        console.error(error);
+        throw new Error('Database error. See server log for details.');
+    }
 };
 
 

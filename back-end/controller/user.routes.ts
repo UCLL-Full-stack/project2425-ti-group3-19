@@ -62,7 +62,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'F_wMoWC2jXN2cW2l-aLRtiNNShI9SfVPeE
  */
 userRouter.get('/', async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const users = userService.getAllUsers();
+        const users = await userService.getAllUsers();
         res.status(200).json(users);
     } catch (error) {
         next(error);
@@ -100,7 +100,7 @@ userRouter.get('/', async (req: Request, res: Response, next: NextFunction) => {
 userRouter.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
     try {
-        const user = userService.getUserById(Number(id));
+        const user = await userService.getUserById(Number(id));
         res.status(200).json(user);
     } catch (error) {
         if ((error as Error).message.includes('does not exist')) {
@@ -157,7 +157,7 @@ userRouter.post('/', async (req: Request, res: Response, next: NextFunction) => 
         const { firstName, lastName, email, password, role } = req.body;
 
         // Create a user using the service
-        const newUser = userService.createUser({ firstName, lastName, email, password, role });
+        const newUser = await userService.createUser({ firstName, lastName, email, password, role });
 
         // Respond with the newly created user
         return res.status(201).json(newUser);

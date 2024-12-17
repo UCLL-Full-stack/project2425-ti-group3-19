@@ -137,7 +137,7 @@ const getAllOrders = async(): Promise<Order[]> => {
     return orderRepository.getAllOrders();
 };
 
-const getUserOrders = (userId: number): Order[] => {
+const getUserOrders = async(userId: number): Promise<Order[]> => {
     return orderRepository.getUserOrders(userId);
 };
 

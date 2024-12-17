@@ -3,6 +3,7 @@ import {v4 as uuidv4} from "uuid"; // Import User type
 import database from '../util/database';
 import { User } from '../model/user';
 import { Promotion } from '../model/promotion';
+const orders: Order[] = []; // In-memory storage for orders
 
 // Function to save a new order
 const saveOrder = async (orderData: {
@@ -11,7 +12,7 @@ const saveOrder = async (orderData: {
     price: number;
     user: User; // Accept the full User object
     promotions: Promotion[]; // Use promotionIds to connect promotions
-    orderReferentie?: string;
+    orderReferentie: string;
 }): Promise<Order> => {
     const parsedOrderDate = new Date(orderData.orderDate);
 
@@ -19,9 +20,7 @@ const saveOrder = async (orderData: {
         throw new Error('Invalid order date');
     }
 
-    const orderReferentie = orderData.orderReferentie || uuidv4();
-
-    // Save the new order in the database
+    // Create a new order instance
     const createdOrder = await database.order.create({
         data: {
             orderDate: parsedOrderDate,
@@ -30,7 +29,7 @@ const saveOrder = async (orderData: {
             user: {
                 connect: { id: orderData.user.getId() }, // Connect using the user's ID
             },
-            orderReferentie,
+            orderReferentie: orderData.orderReferentie,
             promotions: {
                 connect: orderData.promotions.map((promotion) => ({
                     id: promotion.getId(), // Connect using each promotion's ID
@@ -43,7 +42,6 @@ const saveOrder = async (orderData: {
         },
     });
 
-    // Convert the Prisma order to the domain Order model
     return Order.from({
         ...createdOrder,
         user: createdOrder.user,
@@ -80,9 +78,15 @@ const getAllOrders = async ():Promise<Order[]> => {
 
 };
 
+const getUserOrders = (userId: number): Order[] => {
+    return orders.filter(order => order.getUser().getId() === userId);
+};
+
+
 // Export the repository functions as an object for easy import
 export default {
     saveOrder,
     getOrderById,
     getAllOrders,
+    getUserOrders,
 };

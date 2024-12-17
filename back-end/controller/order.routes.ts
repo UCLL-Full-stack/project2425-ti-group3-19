@@ -118,12 +118,20 @@ orderRouter.post('/', authenticateUser, async (
             ...order,
             user: req.user,
         }));
-
+        console.log(ordersWithUser);
         const createdOrders = await orderService.createMultipleOrders(ordersWithUser);
         res.status(201).json(createdOrders);
     } catch (error) {
         next(error);
     }
+});
+
+
+orderRouter.get('/user-orders', async (req, res) => {
+    console.log("aaaaa");
+    const userId = req.query.userId; // Ensure you have userId in the request
+    const orders = await orderService.getUserOrders(Number(userId));
+    res.json(orders);
 });
 
 export { orderRouter };

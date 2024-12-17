@@ -1,4 +1,6 @@
 import { Beurtenkaart as BeurtenkaartPrisma} from '@prisma/client';
+import { isAfter } from 'date-fns';
+import { Order } from './order';
 
 export class Beurtenkaart {
     private id: number; // Not optional
@@ -7,7 +9,7 @@ export class Beurtenkaart {
     private valid: boolean;
     private startDate: Date;
     private endDate: Date;
-    private orderId: number;
+    private orderId: string;
 
     constructor(beurtenkaart: {
         id: number;
@@ -16,7 +18,7 @@ export class Beurtenkaart {
         valid: boolean;
         startDate: Date;
         endDate: Date;
-        orderId: number;
+        orderId: string
     }) {
         this.validate(beurtenkaart);
 
@@ -53,7 +55,7 @@ export class Beurtenkaart {
         return this.endDate;
     }
 
-    getOrderId(): number {
+    getOrderId(): string {
         return this.orderId;
     }
 
@@ -64,7 +66,7 @@ export class Beurtenkaart {
         valid: boolean;
         startDate: Date;
         endDate: Date;
-        orderId: number;
+        orderId: string;
     }) {
         if (beurtenkaart.id <= 0) {
             throw new Error('ID must be a positive number');
@@ -84,7 +86,7 @@ export class Beurtenkaart {
         if (beurtenkaart.endDate < beurtenkaart.startDate) {
             throw new Error('EndDate cannot be before StartDate');
         }
-        if (!beurtenkaart.orderId) {
+        if (beurtenkaart.orderId === undefined) {
             throw new Error('Order ID is required');
         }
     }
@@ -100,16 +102,3 @@ export class Beurtenkaart {
             this.orderId === beurtenkaart.getOrderId()
         );
     }
-
-    // static from(beurtenkaartPrisma: BeurtenkaartPrisma): Beurtenkaart {
-    //     return new Beurtenkaart({
-    //         id: beurtenkaartPrisma.id,
-    //         beurten: beurtenkaartPrisma.beurten,
-    //         price: beurtenkaartPrisma.price,
-    //         valid: beurtenkaartPrisma.valid,
-    //         startDate: beurtenkaartPrisma.startDate,
-    //         endDate: beurtenkaartPrisma.endDate,
-    //         orderId: beurtenkaartPrisma.orderId,
-    //     });
-    // }
-}

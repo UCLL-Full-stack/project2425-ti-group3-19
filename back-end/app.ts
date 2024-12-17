@@ -7,16 +7,28 @@ import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 import { userRouter } from './controller/user.routes';
 import { orderRouter } from './controller/order.routes';
+import { subRouter } from './controller/subscription.routes';
+import { beurtRouter } from './controller/beurtenkaart.routes';
+import { ticketRouter } from './controller/ticket.routes';
 
 const app = express();
 dotenv.config();
 const port = process.env.APP_PORT || 3000;
 
-app.use(cors());
+app.use(cors({
+    origin: ['http://localhost:8080', 'http://localhost:3000'], // Add both frontend and backend URLs
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 app.use(bodyParser.json());
 
 app.use('/users', userRouter);
 app.use('/orders', orderRouter);
+app.use('/subscriptions', subRouter);
+app.use('/beurtenkaarten', beurtRouter);
+app.use('/tickets', ticketRouter);
 
 app.get('/status', (req, res) => {
     res.json({ message: 'Back-end is running...' });

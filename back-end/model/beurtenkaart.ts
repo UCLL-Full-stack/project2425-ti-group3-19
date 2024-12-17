@@ -102,3 +102,5 @@ export class Beurtenkaart {
             this.orderId === beurtenkaart.getOrderId()
         );
     }
+
+}

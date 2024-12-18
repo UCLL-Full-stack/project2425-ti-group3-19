@@ -66,7 +66,6 @@ const getUserByEmail = async ({ email }: { email: string }): Promise<User | null
 // Function to save a new user
 const saveUser = async (userData: { firstName: string; lastName: string; email: string; password: string; role: Role }): Promise<User> => {
     try {
-        // Check for existing user with the same email
         const existingUser = await database.user.findUnique({
             where: { email: userData.email },
         });

@@ -1,10 +1,12 @@
 // components/Header.tsx
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 
 export default function Header() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
-
+    const router = useRouter();
+    
     useEffect(() => {
         const token = localStorage.getItem('authToken');
         setIsLoggedIn(!!token);
@@ -13,7 +15,7 @@ export default function Header() {
     const handleLogout = () => {
         localStorage.removeItem('authToken');
         setIsLoggedIn(false);
-        // Optionally, add redirect or page reload after logout
+        router.reload();
     };
 
     return (

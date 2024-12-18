@@ -5,7 +5,7 @@ import database from '../util/database';
 const beurtenkaarten: Beurtenkaart[] = [];
 
 // Function to retrieve all beurtenkaarten
-const getAllBeurtenkaarten = async(): Promise<Beurtenkaart[]> => {
+const getAllBeurtenkaarten = async (): Promise<Beurtenkaart[]> => {
     try {
         const beurtenPrisma = await database.beurtenkaart.findMany();
         return beurtenPrisma.map((beurtenPrisma) => Beurtenkaart.from(beurtenPrisma))
@@ -16,7 +16,7 @@ const getAllBeurtenkaarten = async(): Promise<Beurtenkaart[]> => {
 };
 
 // Function to retrieve a beurtenkaart by ID
-const getBeurtenkaartById = async(id: number): Promise<Beurtenkaart | null> => {
+const getBeurtenkaartById = async (id: number): Promise<Beurtenkaart | null> => {
     try {
         const beurtenPrisma = await database.beurtenkaart.findUnique({
             where: { id },
@@ -29,19 +29,24 @@ const getBeurtenkaartById = async(id: number): Promise<Beurtenkaart | null> => {
 };
 
 // Function to save a new beurtenkaart
-const saveBeurtenkaart = async(beurtenkaart: Beurtenkaart): Promise<Beurtenkaart> => {
-    const beurtenPrisma = await database.beurtenkaart.create({
-        data: {
-            id: beurtenkaart.getId(),
-            beurten: beurtenkaart.getBeurten(),
-            price: beurtenkaart.getPrice(),
-            valid: beurtenkaart.isValid(),
-            startDate: beurtenkaart.getStartDate(),
-            endDate: beurtenkaart.getEndDate(),
-            orderId: beurtenkaart.getOrderId(),
-        },
-    });
-    return Beurtenkaart.from(beurtenPrisma);
+const saveBeurtenkaart = async ({ id,beurten,price,valid,startDate, endDate, orderId }: Beurtenkaart): Promise<Beurtenkaart> => {
+    try {
+        const beurtenPrisma = await database.beurtenkaart.create({
+            data: {
+                id,
+                beurten,
+                price,
+                valid,
+                startDate,
+                endDate,
+                orderId,
+            },
+        });
+        return Beurtenkaart.from(beurtenPrisma);
+    } catch (error) {
+        console.error(error);
+        throw new Error('Database error. See server log for details.');
+    }
 };
 
 const findBeurtenByUserId = async (userId: string): Promise<Beurtenkaart[]> => {
@@ -49,10 +54,10 @@ const findBeurtenByUserId = async (userId: string): Promise<Beurtenkaart[]> => {
 
     const ordersPrisma = await database.order.findMany({
         where: {
-            userId: userIdN, 
+            userId: userIdN,
         },
         select: {
-            id: true, 
+            id: true,
         },
     });
 

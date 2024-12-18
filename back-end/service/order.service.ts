@@ -36,7 +36,7 @@ const createOrder = async (orderData: {
         promotions,
     });
 
-    
+
 
     // Save the order using the repository and return the saved order
     return orderRepository.saveOrder({
@@ -70,12 +70,12 @@ const createMultipleOrders = async (ordersData: {
         switch (data.product) {
             case 'Ticket':
                 product = new Ticket({
-                id: orders.length + 1,
-                date: orderDate,
-                price: data.price,
-                startStation: data.beginStation,
-                desStation: data.endStation,
-                orderId: orderReferentie,
+                    id: orders.length + 1,
+                    date: orderDate,
+                    price: data.price,
+                    startStation: data.beginStation,
+                    desStation: data.endStation,
+                    orderId: orderReferentie,
                 });
                 await ticketService.createTicket(product);
                 break;
@@ -108,7 +108,7 @@ const createMultipleOrders = async (ordersData: {
             default:
                 throw new Error('Invalid product type');
         }
-        const order = await createOrder({...data, orderReferentie, promotions: promotionIds,});
+        const order = await createOrder({ ...data, orderReferentie, promotions: promotionIds, });
         orders.push(order);
     }
     return orders;
@@ -138,11 +138,11 @@ const calculateSubscriptionEndDate = (startDate: Date, subscriptionLength: strin
 };
 
 //Method to get all orders
-const getAllOrders = async(): Promise<Order[]> => {
+const getAllOrders = async (): Promise<Order[]> => {
     return orderRepository.getAllOrders();
 };
 
-const getUserOrders = async(userId: number): Promise<Order[]> => {
+const getUserOrders = async (userId: number): Promise<Order[]> => {
     return orderRepository.getUserOrders(userId);
 };
 

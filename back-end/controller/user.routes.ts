@@ -35,7 +35,6 @@ import userService from '../service/user.service';
 import jwt from 'jsonwebtoken';
 import {authenticateUser} from '../middleware/authenticateUser';
 import { AuthenticatedRequest } from '../types/express';
-import { User } from '../model/user';
 
 const userRouter = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'F_wMoWC2jXN2cW2l-aLRtiNNShI9SfVPeEKXg5olAUQ';

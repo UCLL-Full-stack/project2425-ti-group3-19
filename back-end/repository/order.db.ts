@@ -9,8 +9,8 @@ const saveOrder = async (orderData: {
     orderDate: Date;
     product: string;
     price: number;
-    user: User; // Accept the full User object
-    promotions: Promotion[]; // Use promotionIds to connect promotions
+    user: User; 
+    promotions: Promotion[];
     orderReferentie: string;
 }): Promise<Order> => {
     const parsedOrderDate = new Date(orderData.orderDate);
@@ -26,18 +26,18 @@ const saveOrder = async (orderData: {
             product: orderData.product,
             price: orderData.price,
             user: {
-                connect: { id: orderData.user.getId() }, // Connect using the user's ID
+                connect: { id: orderData.user.getId() }, 
             },
             orderReferentie: orderData.orderReferentie,
             promotions: {
                 connect: orderData.promotions.map((promotion) => ({
-                    id: promotion.getId(), // Connect using each promotion's ID
+                    id: promotion.getId(), 
                 })),
             },
         },
         include: {
-            user: true, // Include the user relation in the returned object
-            promotions: true, // Include the promotions relation
+            user: true, 
+            promotions: true, 
         },
     });
 

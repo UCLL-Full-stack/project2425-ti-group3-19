@@ -3,15 +3,15 @@ import { isAfter } from 'date-fns';
 import { Order } from './order';
 
 export class Beurtenkaart {
-    private id: number; // Not optional
-    private beurten: number;
-    private price: number;
-    private valid: boolean;
-    private startDate: Date;
-    private endDate: Date;
-    private orderId: string;
-    private createdAt?: Date;
-    private updatedAt?: Date;
+    readonly id: number; // Not optional
+    readonly beurten: number;
+    readonly price: number;
+    readonly valid: boolean;
+    readonly startDate: Date;
+    readonly endDate: Date;
+    readonly orderId: string;
+    readonly createdAt?: Date;
+    readonly updatedAt?: Date;
 
     constructor(beurtenkaart: {
         id: number;

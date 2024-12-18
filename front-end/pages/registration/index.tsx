@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Header from '@/components/header';
 import { FormEvent, useState } from 'react';
+import { useRouter } from 'next/router';
 
 export default function Register() {
     const [firstName, setFirstName] = useState('');
@@ -10,6 +11,7 @@ export default function Register() {
     const [role, setRole] = useState('user'); // Default role can be set as needed
     const [errorMessage, setErrorMessage] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
+    const router = useRouter();
 
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -34,6 +36,8 @@ export default function Register() {
             // Handle successful registration, e.g., redirect or show a success message
             console.log('User registered successfully:', newUser);
             setSuccessMessage('Registering successful!');
+            setTimeout(() => router.push('/login'), 1000)
+
         } catch (error) {
             setErrorMessage((error as Error).message);
         }

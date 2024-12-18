@@ -1,18 +1,32 @@
 import { Ticket } from '../model/ticket'; // Assuming you have a Ticket model
 import orderService from '../service/order.service';
+import database from '../util/database';
 
-const tickets: Ticket[] = [];
+// const tickets: Ticket[] = [];
 
 // Function to retrieve all tickets
-const getAllTickets = (): Ticket[] => {
-    return tickets;
-};
+const getAllTickets = async (): Promise<Ticket[]> => {
+    try {
+        const ticketPrisma = await database.ticket.findMany();
+        return ticketPrisma.map((ticketPrisma) => Ticket.from(ticketPrisma))
+    } catch (error) {
+        console.error(error);
+        throw new Error("Database error. See server log for details.");
+    }};
 
 // Function to retrieve a ticket by ID
-const getTicketById = (id: number): Ticket | null => {
-    const ticket = tickets.find((ticket) => ticket.getId() === id);
-    return ticket || null;
+const getTicketById = async ({ id }: { id: number }): Promise<Ticket | null> => {
+    try {
+        const ticketPrisma = await database.ticket.findUnique({
+            where: { id },
+        });
+        return ticketPrisma ? Ticket.from(ticketPrisma) : null;
+    } catch (error) {
+        console.error(error)
+        throw new Error("Database error. See server log for details.");
+    }
 };
+
 
 // Function to save a new ticket
 const saveTicket = (ticket: Ticket): Ticket => {

@@ -2,20 +2,6 @@ import { User } from '../model/user';
 import { Role } from '../types';
 import database from '../util/database';
 
-// const users: User[] = [];
-
-// const user_wiebe = new User({
-//     id: 1,
-//     firstName: 'Wiebe',
-//     lastName: 'Delvaux',
-//     email: 'wiebe.delvaux@gmail.com',
-//     password: 'test1',
-//     role: 'admin'
-// });
-
-// users.push(user_wiebe);
-
-// Function to retrieve all users
 const getAllUsers = async (): Promise<User[]> => {
     try {
         const usersPrisma = await database.user.findMany();

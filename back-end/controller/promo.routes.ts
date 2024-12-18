@@ -1,10 +1,86 @@
 import { Router } from 'express';
-import promotionService from '../service/promo.service';// Adjust the import path as necessary
+import promotionService from '../service/promo.service'; // Adjust the import path as necessary
 import express, { NextFunction, Request, Response } from 'express';
-
 
 const promoRouter = express.Router();
 
+/**
+ * @swagger
+ * components:
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
+ *   schemas:
+ *     Promotion:
+ *       type: object
+ *       properties:
+ *         code:
+ *           type: string
+ *           description: The promotion code.
+ *         discount:
+ *           type: number
+ *           description: The discount amount.
+ *         isActive:
+ *           type: boolean
+ *           description: Whether the promotion is active.
+ *   tags:
+ *     - Promotions
+ * /promocodes/validate:
+ *   post:
+ *     summary: Validate a promotion code
+ *     description: Validates a promotion code and returns the discount and status of the promotion.
+ *     tags:
+ *       - Promotions
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               code:
+ *                 type: string
+ *                 description: The promotion code to validate.
+ *                 example: "PROMO123"
+ *     responses:
+ *       200:
+ *         description: Promotion code is valid and active, with the discount amount returned.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 discount:
+ *                   type: number
+ *                   description: The discount amount provided by the promotion.
+ *                   example: 15.5
+ *                 isActive:
+ *                   type: boolean
+ *                   description: Whether the promotion is currently active.
+ *                   example: true
+ *       400:
+ *         description: Invalid or inactive promotion code.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Invalid or inactive promotion code."
+ *       500:
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Internal server error."
+ */
 promoRouter.post('/validate', async (req, res) => {
     const { code } = req.body;
 
@@ -22,4 +98,4 @@ promoRouter.post('/validate', async (req, res) => {
     }
 });
 
-export { promoRouter};
+export { promoRouter };

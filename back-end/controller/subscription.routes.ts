@@ -4,6 +4,57 @@ import express, { NextFunction, Request, Response } from 'express';
 
 const subRouter = express.Router();
 
+/**
+ * @swagger
+ * components:
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
+ *   schemas:
+ *     Subscription:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: integer
+ *         userId:
+ *           type: string
+ *         plan:
+ *           type: string
+ *         startDate:
+ *           type: string
+ *           format: date
+ *         endDate:
+ *           type: string
+ *           format: date
+ *   tags:
+ *     - Subscriptions
+ * /subscriptions/subsuser:
+ *   get:
+ *     summary: Get subscriptions by user ID
+ *     description: Retrieve subscriptions associated with a specific user based on their userId.
+ *     tags:
+ *       - Subscriptions
+ *     parameters:
+ *       - name: userId
+ *         in: query
+ *         description: The ID of the user to retrieve subscriptions for.
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: A list of subscriptions associated with the user.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Subscription'
+ *       400:
+ *         description: Bad request. Error message is provided in the response.
+ */
 subRouter.get('/subsuser', async (req, res) => {
     console.log("anwezf");
     try {
@@ -16,7 +67,30 @@ subRouter.get('/subsuser', async (req, res) => {
     }
 });
 
-// Route to create a new subscription
+/**
+ * @swagger
+ * /subscriptions/subscriptions:
+ *   post:
+ *     summary: Create a new subscription
+ *     description: Create a new subscription with the provided data.
+ *     tags:
+ *       - Subscriptions
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Subscription'
+ *     responses:
+ *       201:
+ *         description: Subscription created successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Subscription'
+ *       400:
+ *         description: Bad request. Error message is provided in the response.
+ */
 subRouter.post('/subscriptions', async (req, res) => {
     try {
         const subscription = await subscriptionService.createSubscription(req.body);
@@ -26,7 +100,26 @@ subRouter.post('/subscriptions', async (req, res) => {
     }
 });
 
-// Route to get all subscriptions
+/**
+ * @swagger
+ * /subscriptions:
+ *   get:
+ *     summary: Get all subscriptions
+ *     description: Retrieve a list of all subscriptions in the system.
+ *     tags:
+ *       - Subscriptions
+ *     responses:
+ *       200:
+ *         description: A list of all subscriptions.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Subscription'
+ *       400:
+ *         description: Bad request. Error message is provided in the response.
+ */
 subRouter.get('/', async (req, res) => {
     console.log("aaaaaddddddd");
     try {
@@ -37,6 +130,33 @@ subRouter.get('/', async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /subscriptions/{orderReferentie}:
+ *   get:
+ *     summary: Get a subscription by order reference
+ *     description: Retrieve a specific subscription based on the order reference.
+ *     tags:
+ *       - Subscriptions
+ *     parameters:
+ *       - name: orderReferentie
+ *         in: path
+ *         description: The order reference of the subscription to retrieve.
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: A single subscription associated with the provided order reference.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Subscription'
+ *       404:
+ *         description: Subscription not found.
+ *       400:
+ *         description: Bad request. Error message is provided in the response.
+ */
 subRouter.get('/:orderReferentie', async (req, res, next) => {
     try {
         const { orderReferentie } = req.params;
@@ -50,7 +170,33 @@ subRouter.get('/:orderReferentie', async (req, res, next) => {
     }
 });
 
-// Route to get a subscription by ID
+/**
+ * @swagger
+ * /subscriptions/subscriptions/{id}:
+ *   get:
+ *     summary: Get a subscription by ID
+ *     description: Retrieve a specific subscription based on the subscription ID.
+ *     tags:
+ *       - Subscriptions
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         description: The ID of the subscription to retrieve.
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: A single subscription associated with the provided ID.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Subscription'
+ *       404:
+ *         description: Subscription not found.
+ *       400:
+ *         description: Bad request. Error message is provided in the response.
+ */
 subRouter.get('/subscriptions/:id', async (req, res) => {
     try {
         const subscription = await subscriptionService.getSubscriptionById(parseInt(req.params.id));
@@ -64,4 +210,4 @@ subRouter.get('/subscriptions/:id', async (req, res) => {
     }
 });
 
-export { subRouter};
+export { subRouter };

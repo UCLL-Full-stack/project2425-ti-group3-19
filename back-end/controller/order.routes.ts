@@ -1,3 +1,10 @@
+import express, { NextFunction, Request, Response } from 'express';
+import orderService from '../service/order.service';
+import { AuthenticatedRequest } from '../types/express';
+import { authenticateUser } from "../middleware/authenticateUser";
+
+const orderRouter = express.Router();
+
 /**
  * @swagger
  * components:
@@ -24,18 +31,13 @@
  *           type: number
  *           format: int64
  *           description: Product price.
- *         User:
+ *         user:
  *           type: object
  *           description: User object.
  *         promotions:
  *           type: array
  *           description: Promotions from the order.
  */
-
-import express, { NextFunction, Request, Response } from 'express';
-import orderService from '../service/order.service';
-
-const orderRouter = express.Router();
 
 /**
  * @swagger
@@ -59,7 +61,7 @@ const orderRouter = express.Router();
  */
 orderRouter.get('/', async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const orders = orderService.getAllOrders();
+        const orders = await orderService.getAllOrders();
         res.status(200).json(orders);
     } catch (error) {
         next(error);
@@ -94,10 +96,6 @@ orderRouter.get('/', async (req: Request, res: Response, next: NextFunction) => 
  *       500:
  *         description: Internal server error.
  */
-
-import { AuthenticatedRequest } from '../types/express';
-import {authenticateUser} from "../middleware/authenticateUser";
-
 orderRouter.post('/', authenticateUser, async (
     req: AuthenticatedRequest,
     res: Response,
@@ -126,12 +124,48 @@ orderRouter.post('/', authenticateUser, async (
     }
 });
 
-
+/**
+ * @swagger
+ * /orders/user-orders:
+ *   get:
+ *     summary: Get all orders of a specific user.
+ *     description: Returns a list of orders for a user specified by `userId`.
+ *     tags:
+ *       - Orders
+ *     parameters:
+ *       - in: query
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           description: The ID of the user whose orders you want to fetch.
+ *           example: 123
+ *     responses:
+ *       200:
+ *         description: List of orders for the specified user.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Order'
+ *       400:
+ *         description: Missing or invalid `userId` parameter.
+ *       500:
+ *         description: Internal server error.
+ */
 orderRouter.get('/user-orders', async (req, res) => {
-    console.log("aaaaa");
     const userId = req.query.userId; // Ensure you have userId in the request
-    const orders = await orderService.getUserOrders(Number(userId));
-    res.json(orders);
+    if (!userId) {
+        return res.status(400).json({ message: 'UserId is required' });
+    }
+
+    try {
+        const orders = await orderService.getUserOrders(Number(userId));
+        res.status(200).json(orders);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching user orders' });
+    }
 });
 
 export { orderRouter };

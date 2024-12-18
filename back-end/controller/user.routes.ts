@@ -272,16 +272,41 @@ userRouter.get('/profile', authenticateUser, async (
     }
 });
 
+/**
+ * @swagger
+ * /users/current-user:
+ *   get:
+ *     summary: Get the current user's ID.
+ *     description: Returns the ID of the currently logged-in user based on the JWT token.
+ *     tags:
+ *       - Users
+ *     security:
+ *       - bearerAuth: []  # Indicates the need for JWT authentication
+ *     responses:
+ *       200:
+ *         description: The user's ID.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: number
+ *                   description: The user's unique identifier.
+ *       401:
+ *         description: Unauthorized if token is invalid or missing.
+ *       500:
+ *         description: Internal server error.
+ */
 userRouter.get('/current-user', authenticateUser, async (
     req: AuthenticatedRequest, 
     res: Response, 
     next: NextFunction
-    ) => {
-        if (!req.user) {
-            return res.status(401).json({ message: 'User not authenticated' });
-        }
-        const userId = req.user.getId();
-        res.json({ id: userId });
+) => {
+    if (!req.user) {
+        return res.status(401).json({ message: 'User not authenticated' });
+    }
+    const userId = req.user.getId();  // Assuming getId() returns the user's unique ID
+    res.status(200).json({ id: userId });
 });
-
 export { userRouter };

@@ -59,15 +59,27 @@ const getSubscriptionByReferentie = async (orderReferentie: string) => {
 };
 
 const findSubscriptionsByUserId = async (userId: string): Promise<Subscription[]> => {
-    var userIdN: number = +userId;
-    const orders = await orderService.getUserOrders(userIdN);
-    console.log(orders);
-    const orderIds = orders.map(order => order.getorderReferentie());
-    const userSubscriptions = subscriptions.filter(subscription =>
-        orderIds.includes(subscription.getOrderId())
-    );
-    return userSubscriptions;
-}
+    const userIdN: number = +userId; // Convert userId to number if needed
+
+    const ordersPrisma = await database.order.findMany({
+        where: {
+            userId: userIdN, 
+        },
+        select: {
+            id: true, 
+        },
+    });
+
+    const orderIds = ordersPrisma.map(order => order.id);
+
+    const subPrisma = await database.subscription.findMany({
+        where: {
+            orderId: { in: orderIds },
+        },
+    });
+
+    return subPrisma.map(subscription => Subscription.from(subscription));
+};
 
 // Export the repository functions as an object for easy import
 export default {

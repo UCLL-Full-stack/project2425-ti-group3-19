@@ -10,15 +10,18 @@ const getAllSubscriptions = async (): Promise<Subscription[]> => {
 };
 
 const getSubscriptionById = async (id: number): Promise<Subscription | null> => {
-    return subscriptionRepository.getSubscriptionById(id);
+    const subscription = subscriptionRepository.getSubscriptionById({ id });
+    if (!subscription) {
+        throw new Error(`Subscription with id ${id} does not exist.`);
+    }
+    return subscription
 };
 
 const getSubscriptionByReferentie = async (orderReferentie: string) => {
     return await subscriptionRepository.getSubscriptionByReferentie(orderReferentie);
 };
 
-const getSubscriptionsByUserId = async(userId: string): Promise<Subscription[]> => {
-    // Logic to get subscriptions by user ID
+const getSubscriptionsByUserId = async (userId: string): Promise<Subscription[]> => {
     return await subscriptionRepository.findSubscriptionsByUserId(userId);
 }
 

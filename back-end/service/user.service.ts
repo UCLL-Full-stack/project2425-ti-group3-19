@@ -60,7 +60,7 @@ const createUser = async (userData: { firstName: string; lastName: string; email
             product: order.getProduct(),
             price: order.getPrice(),
             user: order.getUser(),
-            promotions: order.getPromotions(),
+            promotions: order.getPromotions().map(promo => promo.id),
             orderReferentie: order.getorderReferentie()
         });
 

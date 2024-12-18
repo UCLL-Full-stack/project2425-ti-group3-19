@@ -192,7 +192,6 @@ export default function BuyTickets() {
             setSuccessMessage('');
             return;
         }
-        setErrorMessage('something went wrong');
 
         try {
             const response = await fetch(process.env.NEXT_PUBLIC_API_URL + '/orders', {

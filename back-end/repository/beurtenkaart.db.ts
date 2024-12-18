@@ -1,11 +1,19 @@
 import { Beurtenkaart } from '../model/beurtenkaart'; // Assuming you have a Beurtenkaart model
 import orderService from '../service/order.service';
+import database from '../util/database';
 
 const beurtenkaarten: Beurtenkaart[] = [];
 
 // Function to retrieve all beurtenkaarten
-const getAllBeurtenkaarten = (): Beurtenkaart[] => {
-    return beurtenkaarten;
+const getAllBeurtenkaarten = async(): Promise<Beurtenkaart[]> => {
+    try {
+        const beurtenPrisma = await database.beurtenkaart.findMany();
+        return beurtenPrisma.map((beurtenPrisma) => Beurtenkaart.from(beurtenPrisma))
+    } catch (error) {
+        console.error(error);
+        
+        throw new Error("Database error. See server log for details.");
+    }
 };
 
 // Function to retrieve a beurtenkaart by ID

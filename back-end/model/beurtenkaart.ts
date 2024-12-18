@@ -1,4 +1,4 @@
-import { Beurtenkaart as BeurtenkaartPrisma} from '@prisma/client';
+import { Beurtenkaart as BeurtenkaartPrisma } from '@prisma/client';
 import { isAfter } from 'date-fns';
 import { Order } from './order';
 
@@ -10,6 +10,8 @@ export class Beurtenkaart {
     private startDate: Date;
     private endDate: Date;
     private orderId: string;
+    private createdAt?: Date;
+    private updatedAt?: Date;
 
     constructor(beurtenkaart: {
         id: number;
@@ -18,7 +20,9 @@ export class Beurtenkaart {
         valid: boolean;
         startDate: Date;
         endDate: Date;
-        orderId: string
+        orderId: string;
+        createdAt?: Date;
+        updatedAt?: Date;
     }) {
         this.validate(beurtenkaart);
 
@@ -29,6 +33,8 @@ export class Beurtenkaart {
         this.startDate = beurtenkaart.startDate;
         this.endDate = beurtenkaart.endDate;
         this.orderId = beurtenkaart.orderId;
+        this.createdAt = beurtenkaart.createdAt;
+        this.updatedAt = beurtenkaart.updatedAt;
     }
 
     getId(): number {
@@ -57,6 +63,14 @@ export class Beurtenkaart {
 
     getOrderId(): string {
         return this.orderId;
+    }
+
+    getCreatedAt(): Date | undefined {
+        return this.createdAt;
+    }
+
+    getUpdatedAt(): Date | undefined {
+        return this.updatedAt;
     }
 
     validate(beurtenkaart: {
@@ -103,4 +117,28 @@ export class Beurtenkaart {
         );
     }
 
+
+    static from({
+        id,
+        beurten,
+        price,
+        valid,
+        startDate,
+        endDate,
+        orderId,
+        createdAt,
+        updatedAt,
+    }: BeurtenkaartPrisma) {
+        return new Beurtenkaart({
+            id,
+            beurten,
+            price,
+            valid,
+            startDate,
+            endDate,
+            orderId,
+            createdAt,
+            updatedAt,
+        });
+    }
 }

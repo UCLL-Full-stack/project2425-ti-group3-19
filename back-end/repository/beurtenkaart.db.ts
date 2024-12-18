@@ -11,33 +11,61 @@ const getAllBeurtenkaarten = async(): Promise<Beurtenkaart[]> => {
         return beurtenPrisma.map((beurtenPrisma) => Beurtenkaart.from(beurtenPrisma))
     } catch (error) {
         console.error(error);
-        
         throw new Error("Database error. See server log for details.");
     }
 };
 
 // Function to retrieve a beurtenkaart by ID
-const getBeurtenkaartById = (id: number): Beurtenkaart | null => {
-    const beurtenkaart = beurtenkaarten.find((bk) => bk.getId() === id);
-    return beurtenkaart || null;
+const getBeurtenkaartById = async(id: number): Promise<Beurtenkaart | null> => {
+    try {
+        const beurtenPrisma = await database.beurtenkaart.findUnique({
+            where: { id },
+        });
+        return beurtenPrisma ? Beurtenkaart.from(beurtenPrisma) : null;
+    } catch (error) {
+        console.error(error)
+        throw new Error("Database error. See server log for details.");
+    }
 };
 
 // Function to save a new beurtenkaart
-const saveBeurtenkaart = (beurtenkaart: Beurtenkaart): Beurtenkaart => {
-    beurtenkaarten.push(beurtenkaart); // Save the Beurtenkaart instance directly
-    return beurtenkaart;
+const saveBeurtenkaart = async(beurtenkaart: Beurtenkaart): Promise<Beurtenkaart> => {
+    const beurtenPrisma = await database.beurtenkaart.create({
+        data: {
+            id: beurtenkaart.getId(),
+            beurten: beurtenkaart.getBeurten(),
+            price: beurtenkaart.getPrice(),
+            valid: beurtenkaart.isValid(),
+            startDate: beurtenkaart.getStartDate(),
+            endDate: beurtenkaart.getEndDate(),
+            orderId: beurtenkaart.getOrderId(),
+        },
+    });
+    return Beurtenkaart.from(beurtenPrisma);
 };
 
 const findBeurtenByUserId = async (userId: string): Promise<Beurtenkaart[]> => {
-    var userIdN: number = +userId;
-    const orders = await orderService.getUserOrders(userIdN);
-    console.log(orders);
-    const orderIds = orders.map(order => order.getorderReferentie());
-    const userBeurten = beurtenkaarten.filter(beurten =>
-        orderIds.includes(beurten.getOrderId())
-    );
-    return userBeurten;
-}
+    const userIdN: number = +userId; // Convert userId to number if needed
+
+    const ordersPrisma = await database.order.findMany({
+        where: {
+            userId: userIdN, 
+        },
+        select: {
+            id: true, 
+        },
+    });
+
+    const orderIds = ordersPrisma.map(order => order.id);
+
+    const beurtenPrisma = await database.beurtenkaart.findMany({
+        where: {
+            orderId: { in: orderIds },
+        },
+    });
+
+    return beurtenPrisma.map(beurtenkaart => Beurtenkaart.from(beurtenkaart));
+};
 
 // Export the repository functions as an object for easy import
 export default {

@@ -10,13 +10,14 @@ import { Beurtenkaart } from '../model/beurtenkaart';
 import ticketService from './ticket.service';
 import subscriptionService from './subscription.service';
 import beurtenkaartService from './beurtenkaart.service';
+import promoRepository from '../repository/promo.db';
 
 const createOrder = async (orderData: {
     orderDate: Date;
     product: string;
     price: number;
     user: User;
-    promotions: Promotion[];
+    promotions: number[];
     orderReferentie: string;
 }): Promise<Order> => {
 
@@ -25,10 +26,14 @@ const createOrder = async (orderData: {
     if (isNaN(parsedOrderDate.getTime())) {
         throw new Error('Invalid order date');
     }
+
+    const promotions = await promoRepository.getPromotionsByIds(orderData.promotions);
+
     // Create a new Order instance using the provided data
     const order = new Order({
         ...orderData,
         orderDate: parsedOrderDate,
+        promotions,
     });
 
     
@@ -49,12 +54,12 @@ const createMultipleOrders = async (ordersData: {
     product: string;
     price: number;
     user: User;
-    promotions: Promotion[];
+    promotions: number[];
     region: string;
     beginStation: string;
     endStation: string;
     subscriptionLength: string;
-}[]): Promise<Order[]> => {
+}[], promotionIds: number[]): Promise<Order[]> => {
     const orderReferentie = uuidv4();
     const orders: Order[] = [];
     for (const data of ordersData) {
@@ -103,7 +108,7 @@ const createMultipleOrders = async (ordersData: {
             default:
                 throw new Error('Invalid product type');
         }
-        const order = await createOrder({...data, orderReferentie});  // Reuse the single order creation function
+        const order = await createOrder({...data, orderReferentie, promotions: promotionIds,});
         orders.push(order);
     }
     return orders;

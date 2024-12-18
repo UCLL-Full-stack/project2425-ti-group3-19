@@ -10,6 +10,9 @@ export default function BuyTickets() {
     const [region, setRegion] = useState<{ value: string; label: string } | null>(null);
     const [beginStation, setBeginStation] = useState<{ value: string; label: string } | null>(null);
     const [endStation, setEndStation] = useState<{ value: string; label: string } | null>(null);
+    const [promoCode, setPromoCode] = useState('');
+    const [promoCodeDiscount, setPromoCodeDiscount] = useState<number | null>(null);
+    const [promoCodeMessage, setPromoCodeMessage] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
     const [orderList, setOrderList] = useState<any[]>([]);
@@ -43,6 +46,33 @@ export default function BuyTickets() {
         setUserId(id);
     }, [router]);
 
+    const validatePromoCode = async () => {
+        if (!promoCode.trim()) {
+            setPromoCodeMessage('Promo code cannot be empty.');
+            return;
+        }
+    
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/promocodes/validate`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ promoCode }),
+            });
+    
+            if (response.ok) {
+                const result = await response.json();
+                setPromoCodeDiscount(result.discount);
+                setPromoCodeMessage(`Promo code applied! Discount: ${result.discount}%`);
+            } else {
+                const errorData = await response.json();
+                setPromoCodeMessage(errorData.message || 'Invalid promo code.');
+                setPromoCodeDiscount(null);
+            }
+        } catch (error) {
+            setPromoCodeMessage('Error validating promo code.');
+        }
+    };
+    
 
     const resetForm = () => {
         setSelectedOption('Ticket');
@@ -171,12 +201,16 @@ export default function BuyTickets() {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`,
                 },
-                body: JSON.stringify({ orders: orderList }),
+                body: JSON.stringify({ orders: orderList, promotionIds: promoCodeDiscount ? [promoCodeDiscount] : [], }),
             });
 
             if (response.ok) {
                 setSuccessMessage('Order successfully placed!');
                 setOrderList([]); // Clear the list after successful purchase
+                setPromoCode('');
+                setPromoCodeDiscount(null);
+                setPromoCodeMessage('');
+                resetForm();
             } else {
                 const errorData = await response.json();
                 setErrorMessage(errorData.message || 'Failed to place order.');
@@ -194,6 +228,25 @@ export default function BuyTickets() {
                 <h2>Buy Tickets and Subscriptions</h2>
                 {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
                 {successMessage && <div className="alert alert-success">{successMessage}</div>}
+
+                <div className="mt-3">
+                    <label htmlFor="promoCode">Promo Code</label>
+                    <input
+                        type="text"
+                        id="promoCode"
+                        className="form-control"
+                        value={promoCode}
+                        onChange={(e) => setPromoCode(e.target.value.trim())}
+                    />
+                    <button
+                        className="btn btn-primary mt-2"
+                        onClick={validatePromoCode}
+                        disabled={!promoCode}
+                    >
+                        Apply Promo Code
+                    </button>
+                    {promoCodeMessage && <div className="mt-2">{promoCodeMessage}</div>}
+                </div>
 
                 {/* Selection Form */}
                 <div>

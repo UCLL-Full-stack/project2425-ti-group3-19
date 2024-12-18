@@ -45,7 +45,7 @@ export default function Login() {
             const { token } = await response.json();
             localStorage.setItem('authToken', token);
             setSuccessMessage('Login successful!');
-            // router.push('/'); // Redirect to the dashboard on successful login
+            router.push('/');
             console.log(token.email)
         } catch (error) {
             setErrorMessage((error as Error).message);

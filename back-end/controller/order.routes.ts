@@ -104,7 +104,7 @@ orderRouter.post('/', authenticateUser, async (
     next: NextFunction
 ) => {
     try {
-        const { orders } = req.body;
+        const { orders, promotionIds } = req.body;
 
         if (!orders || !Array.isArray(orders) || orders.length === 0) {
             return res.status(400).json({ message: 'Orders array is required and cannot be empty.' });
@@ -119,7 +119,7 @@ orderRouter.post('/', authenticateUser, async (
             user: req.user,
         }));
         console.log(ordersWithUser);
-        const createdOrders = await orderService.createMultipleOrders(ordersWithUser);
+        const createdOrders = await orderService.createMultipleOrders(ordersWithUser, promotionIds);
         res.status(201).json(createdOrders);
     } catch (error) {
         next(error);

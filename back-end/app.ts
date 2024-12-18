@@ -10,6 +10,7 @@ import { orderRouter } from './controller/order.routes';
 import { subRouter } from './controller/subscription.routes';
 import { beurtRouter } from './controller/beurtenkaart.routes';
 import { ticketRouter } from './controller/ticket.routes';
+import { promoRouter } from './controller/promo.routes';
 
 const app = express();
 dotenv.config();
@@ -29,6 +30,7 @@ app.use('/orders', orderRouter);
 app.use('/subscriptions', subRouter);
 app.use('/beurtenkaarten', beurtRouter);
 app.use('/tickets', ticketRouter);
+app.use('/promocodes', promoRouter);
 
 app.get('/status', (req, res) => {
     res.json({ message: 'Back-end is running...' });

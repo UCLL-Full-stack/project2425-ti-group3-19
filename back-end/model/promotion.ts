@@ -5,7 +5,7 @@ import {
 import { Order } from './order';
 
 export class Promotion {
-    readonly id?: number;
+    readonly id: number;
     readonly Code: string;
     readonly IsActive: boolean;
     readonly DiscountAmount: number;
@@ -14,7 +14,7 @@ export class Promotion {
     readonly updatedAt?: Date;
 
     constructor(promotion: {
-        id?: number;
+        id: number;
         Code: string;
         IsActive: boolean;
         DiscountAmount: number;

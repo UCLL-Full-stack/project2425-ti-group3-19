@@ -1,4 +1,5 @@
 import { Order } from './order'; // Assuming Order class is in the same directory
+import { Subscription as SubscriptionPrisma } from '@prisma/client';
 
 export class Subscription {
     private id: number; // Not optional
@@ -7,6 +8,8 @@ export class Subscription {
     private startDate: Date;
     private endDate: Date;
     private orderId: string;
+    private createdAt?: Date;
+    private updatedAt?: Date;
 
     constructor(subscription: {
         id: number;
@@ -15,6 +18,8 @@ export class Subscription {
         startDate: Date;
         endDate: Date;
         orderId: string;
+        createdAt?: Date;
+        updatedAt?: Date;
     }) {
         this.validate(subscription);
 
@@ -24,6 +29,8 @@ export class Subscription {
         this.startDate = subscription.startDate;
         this.endDate = subscription.endDate;
         this.orderId = subscription.orderId;
+        this.createdAt = subscription.createdAt;
+        this.updatedAt = subscription.updatedAt;
     }
 
     getId(): number {
@@ -48,6 +55,14 @@ export class Subscription {
 
     getOrderId(): string {
         return this.orderId;
+    }
+
+    getCreatedAt(): Date | undefined {
+        return this.createdAt;
+    }
+
+    getUpdatedAt(): Date | undefined {
+        return this.updatedAt;
     }
 
     validate(subscription: {
@@ -83,9 +98,32 @@ export class Subscription {
             this.id === subscription.getId() &&
             this.region === subscription.getRegion() &&
             this.subtype === subscription.getSubtype() &&
-            this.startDate=== subscription.getStartDate() &&
+            this.startDate === subscription.getStartDate() &&
             this.endDate === subscription.getEndDate() &&
-            this.orderId === subscription.getOrderId()
+            this.orderId === subscription.getOrderId() &&
+            this.createdAt?.getTime() === subscription.createdAt?.getTime() &&
+            this.updatedAt?.getTime() === subscription.updatedAt?.getTime()
         );
+    }
+    static from({
+        id,
+        region,
+        subtype,
+        startDate,
+        endDate,
+        orderId,
+        createdAt,
+        updatedAt,
+    }: SubscriptionPrisma) {
+        return new Subscription({
+            id,
+            region,
+            subtype,
+            startDate,
+            endDate,
+            orderId,
+            createdAt,
+            updatedAt,
+        });
     }
 }

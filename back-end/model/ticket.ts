@@ -100,16 +100,25 @@ export class Ticket {
         );
     }
 
-    static from(prismaTicket: TicketPrisma): Ticket {
+    static from({
+        id,
+        date,
+        price,
+        startStation,
+        desStation,
+        orderId,
+        createdAt,
+        updatedAt,
+    }: TicketPrisma) {
         return new Ticket({
-            id: prismaTicket.id,
-            date: new Date(prismaTicket.date), // Convert string to Date
-            price: prismaTicket.price,
-            startStation: prismaTicket.startStation,
-            desStation: prismaTicket.desStation,
-            orderId: prismaTicket.orderId.toString(), // Convert number to string if necessary
-            createdAt: prismaTicket.createdAt ? new Date(prismaTicket.createdAt) : undefined,
-            updatedAt: prismaTicket.updatedAt ? new Date(prismaTicket.updatedAt) : undefined,
+            id,
+            date,
+            price,
+            startStation,
+            desStation,
+            orderId,
+            createdAt,
+            updatedAt,
         });
     }
 }

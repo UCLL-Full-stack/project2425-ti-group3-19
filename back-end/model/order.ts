@@ -7,7 +7,7 @@ import { User } from './user';
 import { Promotion } from './promotion';
 
 export class Order {
-    readonly id?: number;
+    readonly id?: string;
     readonly orderDate: Date;
     readonly product: string;
     readonly price: number;
@@ -18,7 +18,7 @@ export class Order {
     readonly updatedAt?: Date;
 
     constructor(order: {
-        id?: number;
+        id?: string;
         orderDate: Date;
         product: string;
         price: number;
@@ -49,7 +49,7 @@ export class Order {
     getPrice(): number {
         return this.price;
     }
-    getOrderId(): number | undefined {
+    getOrderId(): string | undefined {
         return this.id;
     }
     getUser(): User {

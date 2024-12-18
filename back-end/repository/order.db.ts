@@ -49,7 +49,7 @@ const saveOrder = async (orderData: {
 };
 
 // Function to retrieve an order by ID
-const getOrderById = async ({ id }: { id: number }): Promise<Order | null> => {
+const getOrderById = async ({ id }: { id: string }): Promise<Order | null> => {
     try {
         const orderPrisma = await database.order.findUnique({
             where: { id },

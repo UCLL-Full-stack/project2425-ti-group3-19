@@ -308,4 +308,85 @@ userRouter.get('/current-user', authenticateUser, async (
     const userId = req.user.getId();  // Assuming getId() returns the user's unique ID
     res.status(200).json({ id: userId });
 });
+
+/**
+ * @swagger
+ * /users/{id}/role:
+ *   put:
+ *     summary: Update a user's role.
+ *     description: This endpoint allows an admin to update the role of a user. Only users with admin permissions can perform this action.
+ *     tags:
+ *       - Users
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID of the user whose role needs to be updated.
+ *         schema:
+ *           type: integer
+ *           format: int64
+ *       - in: body
+ *         name: role
+ *         required: true
+ *         description: The new role to assign to the user.
+ *         schema:
+ *           type: object
+ *           properties:
+ *             role:
+ *               type: string
+ *               enum: [admin, moderator, user]
+ *               description: The new role of the user.
+ *     security:
+ *       - bearerAuth: []  # Requires authentication via JWT
+ *     responses:
+ *       200:
+ *         description: User role updated successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       400:
+ *         description: Bad request if the role is invalid or missing.
+ *       404:
+ *         description: User not found.
+ *       403:
+ *         description: Forbidden if the user does not have the correct permissions.
+ *       500:
+ *         description: Internal server error.
+ */
+userRouter.put('/:id/role', authenticateUser, async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    const { id } = req.params;
+    const { role } = req.body;
+
+    try {
+        // Check if the user is an admin (or have similar permissions)
+        if (!req.user) {
+            return res.status(401).json({ message: 'User not authenticated' });
+        }
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Forbidden: You do not have permission to update user roles.' });
+        }
+
+        // Validate the role
+        if (!['admin', 'moderator', 'user'].includes(role)) {
+            return res.status(400).json({ message: 'Invalid role.' });
+        }
+
+        // Update the user's role in the database
+        const updatedUser = await userService.updateUserRole(Number(id), role);
+
+        if (!updatedUser) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
+        // Return the updated user information
+        res.status(200).json(updatedUser);
+    } catch (error) {
+        next(error);
+    }
+});
+
+
+
+
 export { userRouter };

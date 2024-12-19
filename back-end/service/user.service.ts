@@ -83,6 +83,10 @@ const verifyUserCredentials = async (email: string, password: string): Promise<b
     return false; // User not found
 };
 
+const updateUserRole = async (userId: number, role: Role): Promise<User> => {
+    // Call the repository to update the user's role
+    return await userRepository.updateUserRole(userId, role);
+};
 
 export default {
     getAllUsers,
@@ -92,4 +96,5 @@ export default {
     getUserByEmail,
     createUser,
     verifyUserCredentials,
+    updateUserRole,
 };

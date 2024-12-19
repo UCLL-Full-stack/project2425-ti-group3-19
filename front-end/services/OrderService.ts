@@ -59,4 +59,21 @@ export class OrdersService {
             throw new Error(error.message || 'Failed to place order');
         }
     }
+
+    static async getAllOrders(token: string): Promise<Order[]> {
+        const response = await fetch(`${this.baseUrl}/orders`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
+        });
+    
+        if (!response.ok) {
+            throw new Error('Failed to fetch all orders');
+        }
+    
+        return response.json();
+    }
+    
 }

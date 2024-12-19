@@ -85,4 +85,5 @@ model User {
 enum Role {
   user
   admin
+  moderator
 }

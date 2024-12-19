@@ -1,5 +1,6 @@
+import { Role } from '@prisma/client';
 import { User } from '../model/user';
-import { Role } from '../types';
+//import { Role } from '../types';
 import database from '../util/database';
 
 const getAllUsers = async (): Promise<User[]> => {
@@ -85,6 +86,39 @@ const saveUser = async (userData: { firstName: string; lastName: string; email: 
     }
 };
 
+const updateUserRole = async (userId: number, roleString: Role): Promise<User> => {
+    // Validate the role
+    const validRoles: Role[] = ['admin', 'user', 'moderator'];
+    if (!validRoles.includes(roleString)) {
+        throw new Error('Invalid role.');
+    }
+
+    let role: Role | null = null; // Declare and initialize the role variable
+    if (roleString === 'user') {
+        role = Role.user;
+    } else if (roleString === 'moderator') {
+        role = Role.moderator;
+    } else if (roleString === 'admin') {
+        role = Role.admin;
+    } else {
+        throw new Error('Invalid role.');
+    }
+    
+    try {
+        // Update the role in the database using Prisma
+        const updatedUserPrisma = await database.user.update({
+            where: { id: userId },
+            data: { role },
+        });
+
+        // Return the updated user as a User class instance
+        return User.from(updatedUserPrisma);
+    } catch (error) {
+        console.error(error);
+        throw new Error("Database error. See server log for details.");
+    }
+};
+
 
 
 // Export the repository functions as an object for easy import
@@ -95,4 +129,5 @@ export default {
     getUserByLastName,
     getUserByEmail,
     saveUser,
+    updateUserRole,
 };

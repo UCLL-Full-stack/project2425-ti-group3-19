@@ -2,6 +2,8 @@ import Link from 'next/link';
 import Header from '@/components/header';
 import { FormEvent, useState } from 'react';
 import { useRouter } from 'next/router';
+import userService from '@/services/userService';
+import { User } from '@/types';
 
 export default function Register() {
     const [firstName, setFirstName] = useState('');
@@ -19,13 +21,8 @@ export default function Register() {
         setSuccessMessage('');
 
         try {
-            const response = await fetch(process.env.NEXT_PUBLIC_API_URL + '/users', { // Adjust the URL as necessary
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ firstName, lastName, email, password, role }),
-            });
+            // const user: User = { firstName, lastName, email, password, role };
+            const response = await userService.registerNewUser(firstName, lastName, email, password, role);
 
             if (!response.ok) {
                 const { message } = await response.json();

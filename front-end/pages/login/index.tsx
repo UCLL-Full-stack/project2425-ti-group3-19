@@ -1,4 +1,5 @@
 import Header from "@/components/header";
+import userService from "@/services/userService";
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { FormEvent, useState, useEffect } from 'react';
@@ -29,13 +30,7 @@ export default function Login() {
         setSuccessMessage('');
 
         try {
-            const response = await fetch(process.env.NEXT_PUBLIC_API_URL + '/users/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email, password }),
-            });
+            const response = await userService.loginUser(email,password);
 
             if (!response.ok) {
                 const { message } = await response.json();

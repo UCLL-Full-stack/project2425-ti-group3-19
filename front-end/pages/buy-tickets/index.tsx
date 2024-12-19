@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Header from '@/components/header';
 import Select from 'react-select';
-import {getUserIdFromToken} from '@/services/jwtdecode';
+import { getUserIdFromToken } from '@/services/jwtdecode';
+import { OrdersService } from '@/services/OrderService';
 
 export default function BuyTickets() {
     const [selectedOption, setSelectedOption] = useState('Ticket');
@@ -38,7 +39,6 @@ export default function BuyTickets() {
     useEffect(() => {
         const token = localStorage.getItem('authToken');
         setToken(token);
-        console.log('Token in buy tickets:', token);
         if (!token) {
             router.push('/login');
         }
@@ -51,28 +51,16 @@ export default function BuyTickets() {
             setPromoCodeMessage('Promo code cannot be empty.');
             return;
         }
-    
+
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/promocodes/validate`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ promoCode }),
-            });
-    
-            if (response.ok) {
-                const result = await response.json();
-                setPromoCodeDiscount(result.discount);
-                setPromoCodeMessage(`Promo code applied! Discount: ${result.discount}%`);
-            } else {
-                const errorData = await response.json();
-                setPromoCodeMessage(errorData.message || 'Invalid promo code.');
-                setPromoCodeDiscount(null);
-            }
+            const result = await OrdersService.validatePromoCode(promoCode);
+            setPromoCodeDiscount(result.discount);
+            setPromoCodeMessage(`Promo code applied! Discount: ${result.discount}%`);
         } catch (error) {
-            setPromoCodeMessage('Error validating promo code.');
+            setPromoCodeMessage((error as Error).message);
+            setPromoCodeDiscount(null);
         }
     };
-    
 
     const resetForm = () => {
         setSelectedOption('Ticket');
@@ -82,23 +70,6 @@ export default function BuyTickets() {
         setEndStation(null);
         setIsEditing(false);
         setCurrentOrderId(null);
-    };
-
-    const fetchUserOrders = async () => {
-        try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/orders/user-orders?userId=${userId}`, {
-                method: 'GET',
-                headers: {  
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                },
-            });
-            const orders = await response.json();
-            return orders;
-        } catch (error) {
-            console.error("Error fetching user orders:", error);
-            return [];
-        }
     };
 
     const handleAddOrUpdateOrder = async () => {
@@ -111,62 +82,84 @@ export default function BuyTickets() {
             setSuccessMessage('');
             return;
         }
-        console.log('User ID in frontend buy tickets:', userId);
 
-        const orders = await fetchUserOrders();
-        console.log('Orders in frontend buy tickets:', orders);
-        let matching = false;
+        if (!userId || !token) return;
 
-        if (selectedOption === 'Subscription') {
-            console.log('subscription');
-            const hasMatchingSubscription = async () => {
-                for (const order of orders) {
-                    if (order.product === 'Subscription') {
-                        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/subscriptions/${order.orderReferentie}`);
-                        if (response.ok) {
-                            const subscription = await response.json();
-                            console.log('Subscription:', subscription);
-                            console.log('Region:', subscription.region);
+        try {
+            const orders = await OrdersService.getUserOrders(userId, token);
+            
+            if (selectedOption === 'Subscription') {
+                const hasMatchingSubscription = async () => {
+                    for (const order of orders) {
+                        if (order.product === 'Subscription') {
+                            const subscription = await OrdersService.getSubscription(order.orderReferentie);
                             if (subscription.region === region?.label) {
                                 return true;
                             }
                         }
                     }
+                    return false;
+                };
+
+                const matching = await hasMatchingSubscription();
+                if (matching) {
+                    setErrorMessage('You already have a subscription for this region.');
+                    return;
                 }
-                return false;
-            }; 
-
-            matching = await hasMatchingSubscription();
-            console.log('Matching:', matching);
-            if (matching) {
-                setErrorMessage('You already have a subscription for this region.');
-                return;
             }
+
+            const orderDate = new Date();
+            const orderData = {
+                id: currentOrderId ?? orderList.length + 1,
+                product: selectedOption,
+                orderDate: orderDate.toISOString(),
+                price: 50,
+                region: region?.label,
+                beginStation: beginStation?.label,
+                endStation: endStation?.label,
+                subscriptionLength: selectedOption === 'Subscription' ? subscriptionLength : null,
+            };
+
+            if (isEditing && currentOrderId !== null) {
+                setOrderList(orderList.map(order => order.id === currentOrderId ? orderData : order));
+                setSuccessMessage(`${selectedOption} updated successfully!`);
+            } else {
+                setOrderList([...orderList, orderData]);
+                setSuccessMessage(`${selectedOption} added to list!`);
+            }
+
+            setErrorMessage('');
+            resetForm();
+        } catch (error) {
+            setErrorMessage((error as Error).message);
+        }
+    };
+
+    const handlePurchase = async () => {
+        if (orderList.length === 0) {
+            setErrorMessage('Please add at least one item before purchasing.');
+            setSuccessMessage('');
+            return;
         }
 
-        const orderDate = new Date(); // This will create a Date object (not a string)
-        const orderData = {
-            id: currentOrderId ?? orderList.length + 1,
-            product: selectedOption,
-            orderDate: orderDate.toISOString(),
-            price: 50,
-            region: region?.label,
-            beginStation: beginStation?.label,
-            endStation: endStation?.label,
-            subscriptionLength: selectedOption === 'Subscription' ? subscriptionLength : null,
-        };
+        if (!token) return;
 
-        if (isEditing && currentOrderId !== null) {
-            setOrderList(orderList.map(order => order.id === currentOrderId ? orderData : order));
-            console.log("orderlist here", orderList);
-            setSuccessMessage(`${selectedOption} updated successfully!`);
-        } else {
-            setOrderList([...orderList, orderData]);
-            setSuccessMessage(`${selectedOption} added to list!`);
+        try {
+            await OrdersService.placeOrder(
+                orderList,
+                promoCodeDiscount ? [promoCodeDiscount] : [],
+                token
+            );
+            
+            setSuccessMessage('Order successfully placed!');
+            setOrderList([]);
+            setPromoCode('');
+            setPromoCodeDiscount(null);
+            setPromoCodeMessage('');
+            resetForm();
+        } catch (error) {
+            setErrorMessage((error as Error).message);
         }
-
-        setErrorMessage('');
-        resetForm();
     };
 
     const handleEditOrder = (orderId: number) => {
@@ -185,40 +178,6 @@ export default function BuyTickets() {
     const handleRemoveOrder = (orderId: number) => {
         setOrderList(orderList.filter(order => order.id !== orderId));
     };
-
-    const handlePurchase = async () => {
-        if (orderList.length === 0) {
-            setErrorMessage('Please add at least one item before purchasing.');
-            setSuccessMessage('');
-            return;
-        }
-
-        try {
-            const response = await fetch(process.env.NEXT_PUBLIC_API_URL + '/orders', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                },
-                body: JSON.stringify({ orders: orderList, promotionIds: promoCodeDiscount ? [promoCodeDiscount] : [], }),
-            });
-
-            if (response.ok) {
-                setSuccessMessage('Order successfully placed!');
-                setOrderList([]); // Clear the list after successful purchase
-                setPromoCode('');
-                setPromoCodeDiscount(null);
-                setPromoCodeMessage('');
-                resetForm();
-            } else {
-                const errorData = await response.json();
-                setErrorMessage(errorData.message || 'Failed to place order.');
-            }
-        } catch (error) {
-            setErrorMessage('An error occurred while placing the order.');
-        }
-    };
-
 
     return (
         <>

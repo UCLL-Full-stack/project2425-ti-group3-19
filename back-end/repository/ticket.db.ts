@@ -34,8 +34,8 @@ const saveTicket = async (ticket: Ticket): Promise<Ticket> => {
         where: { id: ticket.getOrderId() }, 
     });
 
-    if (!orderExists) {
-        throw new Error(`Order with ID ${ticket.getOrderId()} does not exist.`);
+    if (orderExists) {
+        throw new Error(`Order with ID ${ticket.getOrderId()} already exists.`);
     }
 
     // Create the ticket

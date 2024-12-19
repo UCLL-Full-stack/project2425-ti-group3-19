@@ -2,51 +2,12 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Header from '@/components/header';
 import { getUserIdFromToken } from '@/services/jwtdecode';
-
-interface User {
-    id: number;
-    firstName: string;
-    lastName: string;
-    email: string;
-    role: string;
-}
-
-interface Order {
-    id: number;
-    orderDate: Date;
-    product: string;
-    price: number;
-    user: User;
-    promotions: any[];
-    orderReferentie: string;
-}
-
-interface Subscription {
-    id: number;
-    startDate: Date;
-    endDate: Date;
-    subtype: string;
-    region: string;
-    orderId: string;
-}
-
-interface Ticket {
-    id: number;
-    date: Date;
-    price: number;
-    startStation: string;
-    desStation: string;
-    orderId: string;
-}
-interface Beurtenkaart {
-    id: number;
-    beurten: number;
-    price: number;
-    valid: boolean;
-    startDate: Date;
-    endDate: Date;
-    orderId: string;
-}
+import { User, Order, Subscription, Ticket, Beurtenkaart } from '@/types';
+import OrdersService from '@/services/OrderService';
+import ticketService from '@/services/ticketService';
+import SubscriptionService from '@/services/SubscriptionService';
+import BeurtenkaartService from '@/services/BeurtenkaartService';
+import userService from '@/services/userService';
 
 export default function AccountPage() {
     const [user, setUser] = useState<User | null>(null);
@@ -61,124 +22,51 @@ export default function AccountPage() {
     const [userId, setUserId] = useState<number | null>(null);
 
     useEffect(() => {
-        const authToken = localStorage.getItem('authToken');
-        setToken(authToken);
-        if (!authToken) {
-            router.push('/login'); // Redirect to login if no token is found
-            return;
-        }
+        const initializeUserData = async () => {
+            const authToken = localStorage.getItem('authToken');
+            setToken(authToken);
 
-        const userId = getUserIdFromToken(authToken);
-        setUserId(userId);
-        if (userId) {
-            fetchUserDetails(userId);
-        } else {
-            setError('Invalid token');
+            if (!authToken) {
+                router.push('/login');
+                return;
+            }
+
+            const extractedUserId = getUserIdFromToken(authToken);
+            setUserId(extractedUserId);
+
+            if (extractedUserId) {
+                try {
+                    await fetchAllUserData(extractedUserId, authToken);
+                } catch (error) {
+                    setError((error as Error).message || 'An error occurred while fetching user data.');
+                }
+            } else {
+                setError('Invalid token');
+            }
+
             setLoading(false);
-        }
+        };
+
+        initializeUserData();
     }, [router]);
 
-    const fetchOrders = async (userId: number) => {
+    const fetchAllUserData = async (userId: number, token: string) => {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/orders/user-orders?userId=${userId}`, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
-                },
-            });
+            const userData = await userService.getUserByID(userId);
+            setUser(userData);
 
-            if (!response.ok) {
-                throw new Error(`Failed to fetch orders: ${response.statusText}`);
-            }
+            const ordersData = await OrdersService.getUserOrders({ userId, token });
+            const subscriptionsData = await SubscriptionService.getUserSubscriptions({ userId, token });
+            const ticketsData = await ticketService.getUserTickets({ userId, token });
+            const beurtenData = await BeurtenkaartService.getUserBeurtenKaarten({ userId, token });
 
-            const data = await response.json();
-            setOrders(data);
+            setOrders(ordersData);
+            setSubscriptions(subscriptionsData);
+            setTickets(ticketsData);
+            setBeurten(beurtenData);
+
         } catch (error) {
-            console.error('Error fetching orders:', error);
-        }
-    };
-
-    const fetchSubscriptions = async (userId: number) => {
-        try {
-            // Fetch all subscriptions for the user
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/subscriptions/subsuser?userId=${userId}`, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error(`Failed to fetch subscriptions: ${response.statusText}`);
-            }
-
-            const data = await response.json();
-            setSubscriptions(data);
-        } catch (error) {
-            console.error('Error fetching subscriptions:', error);
-        }
-    };
-
-    const fetchTickets = async (userId: number) => {
-        try {
-            // Fetch all subscriptions for the user
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tickets/ticketuser?userId=${userId}`, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error(`Failed to fetch tickets: ${response.statusText}`);
-            }
-
-            const data = await response.json();
-            setTickets(data);
-        } catch (error) {
-            console.error('Error fetching tickets:', error);
-        }
-    };
-
-    const fetchBeurten = async (userId: number) => {
-        try {
-            // Fetch all subscriptions for the user
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/beurtenkaarten/beurtuser?userId=${userId}`, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error(`Failed to fetch beurtenkaarten: ${response.statusText}`);
-            }
-
-            const data = await response.json();
-            setBeurten(data);
-        } catch (error) {
-            console.error('Error fetching beurtenkaarten:', error);
-        }
-    };
-
-    const fetchUserDetails = async (userId: number) => {
-        try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${userId}`);
-            if (!response.ok) {
-                throw new Error('Failed to fetch user details');
-            }
-            const data = await response.json();
-            setUser(data);
-
-            // Fetch orders and subscriptions after fetching user details
-            await fetchOrders(userId);
-            await fetchSubscriptions(userId);
-            await fetchTickets(userId);
-            await fetchBeurten(userId);
-        } catch (error) {
-            setError((error as Error).message || 'An error occurred while fetching user data.');
-        } finally {
-            setLoading(false);
+            throw new Error((error as Error).message || 'Failed to fetch user data');
         }
     };
 
@@ -306,15 +194,15 @@ export default function AccountPage() {
                 )}
 
                 <h3 className="mb-4">Your Beurtenkaarten</h3>
-                {tickets.length > 0 ? (
+                {beurten.length > 0 ? (
                     <table className="table table-bordered table-hover">
                         <thead>
                             <tr>
-                                <th>beurtenkaart ID</th>
-                                <th>beurten</th>
+                                <th>Beurtenkaart ID</th>
+                                <th>Beurten</th>
                                 <th>Price</th>
-                                <th>Start date</th>
-                                <th>end date</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
                                 <th>Order Reference</th>
                             </tr>
                         </thead>

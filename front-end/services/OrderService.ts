@@ -1,10 +1,10 @@
-import { Order, PromoCodeResponse } from '@/types';
+import { Order } from "@/types";
 
-export class OrdersService {
-    private static baseUrl = process.env.NEXT_PUBLIC_API_URL;
+const api = process.env.NEXT_PUBLIC_API_URL;
 
-    static async validatePromoCode(promoCode: string): Promise<PromoCodeResponse> {
-        const response = await fetch(`${this.baseUrl}/promocodes/validate`, {
+const validatePromoCode = async ({ promoCode }: { promoCode: string }) => {
+    try {
+        const response = await fetch(`${api}/promocodes/validate`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ promoCode }),
@@ -15,11 +15,17 @@ export class OrdersService {
             throw new Error(error.message || 'Invalid promo code.');
         }
 
-        return response.json();
+        const result = await response.json();
+        return result;
+    } catch (error) {
+        console.error(error);
+        throw error;
     }
+};
 
-    static async getUserOrders(userId: number, token: string): Promise<Order[]> {
-        const response = await fetch(`${this.baseUrl}/orders/user-orders?userId=${userId}`, {
+const getUserOrders = async ({ userId, token }: { userId: number; token: string }) => {
+    try {
+        const response = await fetch(`${api}/orders/user-orders?userId=${userId}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -28,24 +34,20 @@ export class OrdersService {
         });
 
         if (!response.ok) {
-            throw new Error('Failed to fetch user orders');
+            throw new Error(`Failed to fetch orders: ${response.statusText}`);
         }
 
-        return response.json();
+        const result = await response.json();
+        return result;
+    } catch (error) {
+        console.error(error);
+        throw error;
     }
+};
 
-    static async getSubscription(orderReference: string): Promise<any> {
-        const response = await fetch(`${this.baseUrl}/subscriptions/${orderReference}`);
-        
-        if (!response.ok) {
-            throw new Error('Failed to fetch subscription');
-        }
-
-        return response.json();
-    }
-
-    static async placeOrder(orders: Order[], promotionIds: number[], token: string): Promise<void> {
-        const response = await fetch(`${this.baseUrl}/orders`, {
+const placeOrder = async ({ orders, promotionIds, token }: { orders: Order[]; promotionIds: number[]; token: string }) => {
+    try {
+        const response = await fetch(`${api}/orders`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -58,5 +60,10 @@ export class OrdersService {
             const error = await response.json();
             throw new Error(error.message || 'Failed to place order');
         }
+    } catch (error) {
+        console.error(error);
+        throw error;
     }
-}
+};
+
+export default { validatePromoCode, getUserOrders, placeOrder };

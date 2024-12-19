@@ -66,4 +66,20 @@ const placeOrder = async ({ orders, promotionIds, token }: { orders: Order[]; pr
     }
 };
 
-export default { validatePromoCode, getUserOrders, placeOrder };
+const getAllOrders = async (token: string): Promise<Order[]> => {
+    const response = await fetch(`${api}/orders`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+        },
+    });
+
+    if (!response.ok) {
+    throw new Error('Failed to fetch all orders');
+}
+
+return response.json();
+}
+
+export default { validatePromoCode, getUserOrders, placeOrder, getAllOrders };

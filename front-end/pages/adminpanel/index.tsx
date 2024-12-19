@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Header from '@/components/header';
-import { OrdersService } from '@/services/OrderService';
+import OrdersService from '@/services/OrderService';
 import userService from '@/services/userService';
 import { Order, User } from '@/types';
 import { getUserIdFromToken } from '@/services/jwtdecode';

@@ -1,3 +1,5 @@
+import {User} from "@/types";
+
 const api = process.env.NEXT_PUBLIC_API_URL;
 
 
@@ -50,4 +52,30 @@ const getUserByID = async (userId: number) => {
         throw error;
     }
 }
-export default { registerNewUser, loginUser, getUserByID };
+
+const getAllUsers = async (token: string): Promise<User[]> => {
+    const response = await fetch(api + '/users', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+        },
+    });
+    if (!response.ok) {
+        throw new Error('Failed to fetch users');
+    }
+    return response.json(); // Return the list of users
+}
+
+const updateUserRole = async (userId: number, role: string, token: string) => {
+    return await fetch(`${api}/users/${userId}/role`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ role }),
+    });
+}
+
+export default { registerNewUser, loginUser, getUserByID, getAllUsers, updateUserRole };

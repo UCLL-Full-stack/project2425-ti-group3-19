@@ -4,7 +4,7 @@ import Header from '@/components/header';
 import { getUserIdFromToken } from '@/services/jwtdecode';
 import { User, Order, Subscription, Ticket, Beurtenkaart } from '@/types';
 import OrdersService from '@/services/OrderService';
-import ticketService from '@/services/ticketService';
+import ticketService from '@/services/TicketService';
 import SubscriptionService from '@/services/SubscriptionService';
 import BeurtenkaartService from '@/services/BeurtenkaartService';
 import userService from '@/services/userService';

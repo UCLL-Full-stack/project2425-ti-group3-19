@@ -1,56 +1,53 @@
-import { User } from "@/types";
-
 const api = process.env.NEXT_PUBLIC_API_URL;
 
-// Function to register a new user
+
+//Ik gebruik geen type van user omdat hij anders een error gooit in de log.
 const registerNewUser = async (firstName: string, lastName: string, email: string, password: string, role: string) => {
-    return await fetch(api + '/users', {
+    const response = await fetch(api + '/users', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({ firstName, lastName, email, password, role }),
     });
+    if (!response.ok) {
+        const { message } = await response.json();
+        throw new Error(message);
+    }
+    return response
 }
 
-// Function to log in a user
+
 const loginUser = async (email: string, password: string) => {
-    return await fetch(api + '/users/login', {
+    const response = await fetch(api + '/users/login', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({ email, password }),
     });
-}
-
-// Function to get all users
-const getAllUsers = async (token: string): Promise<User[]> => {
-    const response = await fetch(api + '/users', {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-        },
-    });
-
     if (!response.ok) {
-        throw new Error('Failed to fetch users');
+        const { message } = await response.json();
+        throw new Error(message);
     }
-
-    return response.json(); // Return the list of users
+    return response
 }
-
-// Function to update the user's role
-const updateUserRole = async (userId: number, role: string, token: string) => {
-    return await fetch(`${api}/users/${userId}/role`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({ role }),
-    });
+const getUserByID = async (userId: number) => {
+    try {
+        const response = await fetch(`${api}/users/${userId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        if (!response.ok) {
+            throw new Error(`Failed to fetch user with: ${userId}, response:${response.statusText}`);
+        }
+        const result = await response.json();
+        return result;
+    } catch (error) {
+        console.error(error);
+        throw error;
+    }
 }
-
-export default { registerNewUser, loginUser, getAllUsers, updateUserRole };
+export default { registerNewUser, loginUser, getUserByID };

@@ -24,11 +24,6 @@ export default function Register() {
             // const user: User = { firstName, lastName, email, password, role };
             const response = await userService.registerNewUser(firstName, lastName, email, password, role);
 
-            if (!response.ok) {
-                const { message } = await response.json();
-                throw new Error(message);
-            }
-
             const newUser = await response.json();
             // Handle successful registration, e.g., redirect or show a success message
             console.log('User registered successfully:', newUser);

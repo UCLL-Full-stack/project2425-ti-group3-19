@@ -32,11 +32,6 @@ export default function Login() {
         try {
             const response = await userService.loginUser(email,password);
 
-            if (!response.ok) {
-                const { message } = await response.json();
-                throw new Error(message);
-            }
-
             const { token } = await response.json();
             localStorage.setItem('authToken', token);
             setSuccessMessage('Login successful!');

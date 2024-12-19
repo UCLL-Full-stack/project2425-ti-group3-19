@@ -3,7 +3,8 @@ import { useRouter } from 'next/router';
 import Header from '@/components/header';
 import Select from 'react-select';
 import { getUserIdFromToken } from '@/services/jwtdecode';
-import { OrdersService } from '@/services/OrderService';
+import OrdersService from '@/services/OrderService';
+import SubscriptionService from '@/services/SubscriptionService';
 
 export default function BuyTickets() {
     const [selectedOption, setSelectedOption] = useState('Ticket');
@@ -53,7 +54,7 @@ export default function BuyTickets() {
         }
 
         try {
-            const result = await OrdersService.validatePromoCode(promoCode);
+            const result = await OrdersService.validatePromoCode({promoCode});
             setPromoCodeDiscount(result.discount);
             setPromoCodeMessage(`Promo code applied! Discount: ${result.discount}%`);
         } catch (error) {
@@ -86,13 +87,13 @@ export default function BuyTickets() {
         if (!userId || !token) return;
 
         try {
-            const orders = await OrdersService.getUserOrders(userId, token);
-            
+            const orders = await OrdersService.getUserOrders({userId, token});
+
             if (selectedOption === 'Subscription') {
                 const hasMatchingSubscription = async () => {
                     for (const order of orders) {
                         if (order.product === 'Subscription') {
-                            const subscription = await OrdersService.getSubscription(order.orderReferentie);
+                            const subscription = await SubscriptionService.getSubscription(order.orderReferentie);
                             if (subscription.region === region?.label) {
                                 return true;
                             }
@@ -145,12 +146,13 @@ export default function BuyTickets() {
         if (!token) return;
 
         try {
-            await OrdersService.placeOrder(
-                orderList,
-                promoCodeDiscount ? [promoCodeDiscount] : [],
-                token
-            );
+            await OrdersService.placeOrder({
+                orders: orderList,
+                promotionIds: promoCodeDiscount ? [promoCodeDiscount] : [],
+                token,
+            });
             
+
             setSuccessMessage('Order successfully placed!');
             setOrderList([]);
             setPromoCode('');
@@ -281,35 +283,35 @@ export default function BuyTickets() {
 
                 <table className="table mt-4">
                     <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Product</th>
-                        <th>Order Date</th>
-                        <th>Price</th>
-                        <th>Region</th>
-                        <th>Begin Station</th>
-                        <th>End Station</th>
-                        <th>Subscription Length</th>
-                        <th>Actions</th>
-                    </tr>
+                        <tr>
+                            <th>ID</th>
+                            <th>Product</th>
+                            <th>Order Date</th>
+                            <th>Price</th>
+                            <th>Region</th>
+                            <th>Begin Station</th>
+                            <th>End Station</th>
+                            <th>Subscription Length</th>
+                            <th>Actions</th>
+                        </tr>
                     </thead>
                     <tbody>
-                    {orderList.map((order) => (
-                        <tr key={order.id}>
-                            <td>{order.id}</td>
-                            <td>{order.product}</td>
-                            <td>{new Date(order.orderDate).toLocaleDateString()}</td>
-                            <td>${order.price}</td>
-                            <td>{order.region}</td>
-                            <td>{order.beginStation}</td>
-                            <td>{order.endStation}</td>
-                            <td>{order.subscriptionLength}</td>
-                            <td>
-                                <button className="btn btn-warning btn-sm me-2" onClick={() => handleEditOrder(order.id)}>Edit</button>
-                                <button className="btn btn-danger btn-sm" onClick={() => handleRemoveOrder(order.id)}>Remove</button>
-                            </td>
-                        </tr>
-                    ))}
+                        {orderList.map((order) => (
+                            <tr key={order.id}>
+                                <td>{order.id}</td>
+                                <td>{order.product}</td>
+                                <td>{new Date(order.orderDate).toLocaleDateString()}</td>
+                                <td>${order.price}</td>
+                                <td>{order.region}</td>
+                                <td>{order.beginStation}</td>
+                                <td>{order.endStation}</td>
+                                <td>{order.subscriptionLength}</td>
+                                <td>
+                                    <button className="btn btn-warning btn-sm me-2" onClick={() => handleEditOrder(order.id)}>Edit</button>
+                                    <button className="btn btn-danger btn-sm" onClick={() => handleRemoveOrder(order.id)}>Remove</button>
+                                </td>
+                            </tr>
+                        ))}
                     </tbody>
                 </table>
             </div>

@@ -57,15 +57,15 @@ const findBeurtenByUserId = async (userId: string): Promise<Beurtenkaart[]> => {
             userId: userIdN,
         },
         select: {
-            id: true,
+            orderReferentie: true, 
         },
     });
 
-    const orderIds = ordersPrisma.map(order => order.id);
+    const orderReferenties = ordersPrisma.map(order => order.orderReferentie);
 
     const beurtenPrisma = await database.beurtenkaart.findMany({
         where: {
-            orderId: { in: orderIds },
+            orderId: { in: orderReferenties },
         },
     });
 

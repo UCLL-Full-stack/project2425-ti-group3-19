@@ -4,6 +4,8 @@ import { FormEvent, useState } from 'react';
 import { useRouter } from 'next/router';
 import userService from '@/services/userService';
 import { User } from '@/types';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 export default function Register() {
     const [firstName, setFirstName] = useState('');
@@ -14,6 +16,7 @@ export default function Register() {
     const [errorMessage, setErrorMessage] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
     const router = useRouter();
+    const { t } = useTranslation();
 
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -39,64 +42,77 @@ export default function Register() {
         <>
             <Header />
             <div className="container mt-5">
-                <h2>Register</h2>
+                <h2>{t('register.title')}</h2> {/* Use translation for title */}
                 {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
                 {successMessage && <div className="alert alert-success">{successMessage}</div>}
                 <form onSubmit={handleSubmit}>
                     <div className="mb-3">
-                        <label htmlFor="firstName" className="form-label">First name:</label>
+                        <label htmlFor="firstName" className="form-label">{t('register.firstName')}:</label>
                         <input
                             type="text"
                             className="form-control"
                             id="firstName"
-                            placeholder="Enter your first name"
+                            placeholder={t('register.firstName')}
                             required
                             value={firstName}
                             onChange={(e) => setFirstName(e.target.value)}
                         />
                     </div>
                     <div className="mb-3">
-                        <label htmlFor="lastName" className="form-label">Last name:</label>
+                        <label htmlFor="lastName" className="form-label">{t('register.lastName')}:</label>
                         <input
                             type="text"
                             className="form-control"
                             id="lastName"
-                            placeholder="Enter your last name"
+                            placeholder={t('register.lastName')}
                             required
                             value={lastName}
                             onChange={(e) => setLastName(e.target.value)}
                         />
                     </div>
                     <div className="mb-3">
-                        <label htmlFor="email" className="form-label">Email address:</label>
+                        <label htmlFor="email" className="form-label">{t('register.email')}:</label>
                         <input
                             type="email"
                             className="form-control"
                             id="email"
-                            placeholder="Enter email"
+                            placeholder={t('register.email')}
                             required
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                         />
                     </div>
                     <div className="mb-3">
-                        <label htmlFor="password" className="form-label">Password:</label>
+                        <label htmlFor="password" className="form-label">{t('register.password')}:</label>
                         <input
                             type="password"
                             className="form-control"
                             id="password"
-                            placeholder="Password"
+                            placeholder={t('register.password')}
                             required
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                         />
                     </div>
-                    <button type="submit" className="btn btn-primary">Register</button>
+                    <button type="submit" className="btn btn-primary">{t('register.registerButton')}</button>
                     <p className="mt-3">
-                        Already have an account? <Link href="/login">Login here</Link>.
+                        {t('register.alreadyAccount')} <Link href="/login">{t('register.loginHere')}</Link>.
                     </p>
                 </form>
             </div>
         </>
     );
 }
+
+export const getServerSideProps = async ( context: { locale: any; } ) => {
+    const { locale } = context;
+    console.log("Locale:", locale);
+
+    const translations = await serverSideTranslations(locale ?? "en", ["common"]);
+    return {
+        props: {
+            ...translations
+        },
+    };
+};
+

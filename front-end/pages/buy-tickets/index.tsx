@@ -92,8 +92,10 @@ export default function BuyTickets() {
             if (selectedOption === 'Subscription') {
                 const hasMatchingSubscription = async () => {
                     for (const order of orders) {
+                        console.log(order.orderReferentie);
                         if (order.product === 'Subscription') {
-                            const subscription = await SubscriptionService.getSubscription(order.orderReferentie);
+                            console.log(order.orderReferentie);
+                            const subscription = await SubscriptionService.getSubscription({orderReferentie: order.orderReferentie});
                             if (subscription.region === region?.label) {
                                 return true;
                             }

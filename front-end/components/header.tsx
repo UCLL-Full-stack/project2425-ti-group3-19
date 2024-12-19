@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
+import Language from "../components/language/language";
 
 export default function Header() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -26,6 +27,9 @@ export default function Header() {
             <nav>
                 {isLoggedIn ? (
                     <>
+                        <Link href="/adminpanel" passHref>
+                            <button className="btn btn-success me-2">Dashboard</button>
+                        </Link>
                         <Link href="/account" passHref>
                             <button className="btn btn-primary me-2">Account</button>
                         </Link>
@@ -42,8 +46,10 @@ export default function Header() {
                         <Link href="/registration" passHref>
                             <button className="btn btn-secondary">Register</button>
                         </Link>
+
                     </>
                 )}
+                <Language />
             </nav>
         </header>
     );

@@ -3,12 +3,15 @@ import userService from "@/services/userService";
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { FormEvent, useState, useEffect } from 'react';
+import { serverSideTranslations } from "next-i18next/serverSideTranslations";
+import { useTranslation } from "next-i18next";
 
 export default function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
+    const { t } = useTranslation();
     const router = useRouter();
 
     // Check if the user is already authenticated
@@ -34,7 +37,7 @@ export default function Login() {
 
             const { token } = await response.json();
             localStorage.setItem('authToken', token);
-            setSuccessMessage('Login successful!');
+            setSuccessMessage(t('login.successMessage'));
             router.push('/');
             console.log(token.email)
         } catch (error) {
@@ -46,40 +49,53 @@ export default function Login() {
         <>
             <Header />
             <div className="container mt-5">
-                <h2>Login</h2>
+                <h2>{t('login.title')}</h2>
                 {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
                 {successMessage && <div className="alert alert-success">{successMessage}</div>}
                 <form onSubmit={handleSubmit}>
                     <div className="mb-3">
-                        <label htmlFor="email" className="form-label">Email address:</label>
+                        <label htmlFor="email" className="form-label">{t('login.email')}:</label>
                         <input
                             type="email"
                             className="form-control"
                             id="email"
-                            placeholder="Enter email"
+                            placeholder={t('login.email')}
                             required
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                         />
                     </div>
                     <div className="mb-3">
-                        <label htmlFor="password" className="form-label">Password:</label>
+                        <label htmlFor="password" className="form-label">{t('login.password')}:</label>
                         <input
                             type="password"
                             className="form-control"
                             id="password"
-                            placeholder="Password"
+                            placeholder={t('login.password')}
                             required
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                         />
                     </div>
-                    <button type="submit" className="btn btn-primary">Login</button>
+                    <button type="submit" className="btn btn-primary">{t('login.loginButton')}</button>
                     <p className="mt-3">
-                        Don’t have an account? <Link href="/registration">Register here</Link>.
+                    {t('login.register')} <Link href="/registration">{t('login.noaccount')} </Link>
                     </p>
                 </form>
             </div>
         </>
     );
 }
+
+
+export const getServerSideProps = async ( context: { locale: any; } ) => {
+    const { locale } = context;
+    console.log("Locale:", locale);
+
+    const translations = await serverSideTranslations(locale ?? "en", ["common"]);
+    return {
+        props: {
+            ...translations
+        },
+    };
+};

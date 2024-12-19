@@ -1,0 +1,50 @@
+{
+    "login": {
+        "title": "Inloggen",
+        "email": "E-mailadres",
+        "password": "Wachtwoord",
+        "loginButton": "Inloggen",
+        "noaccount": "Registreer hier",
+        "register": "Heb je nog geen account?",
+        "successMessage": "Inloggen succesvol!" 
+    },
+    "register": {
+        "title": "Registreren",
+        "firstName": "Voornaam",
+        "lastName": "Achternaam",
+        "email": "E-mailadres",
+        "password": "Wachtwoord",
+        "registerButton": "Registreren",
+        "alreadyAccount": "Heb je al een account?",
+        "loginHere": "Log hier in",
+        "registerSuccess": "Registreren succesvol!"
+    },
+        "buyTickets": {
+          "title": "Koop Tickets en Abonnementen",
+          "promoCode": "Promo Code",
+          "applyPromoCode": "Promo Code Toepassen",
+          "productType": "Product Type",
+          "subscriptionLength": "Abonnement Duur",
+          "region": "Regio",
+          "beginStation": "Begin Station",
+          "endStation": "Eind Station",
+          "addToList": "Voeg {{product}} toe aan de lijst",
+          "updateOrder": "Werk Bestelling bij",
+          "buyAll": "Koop Alle Producten",
+          "id": "ID",
+          "orderDate": "Bestel Datum",
+          "price": "Prijs",
+          "actions": "Acties",
+          "errorMessage": "Vul alle vereiste velden in.",
+          "successMessage": {
+            "added": "{{product}} toegevoegd aan lijst!",
+            "updated": "{{product}} succesvol bijgewerkt!",
+            "orderPlaced": "Bestelling succesvol geplaatst!"
+          },
+          "promoCodeApplied": "Promo code toegepast! Korting: {{discount}}%",
+          "promoCodeEmpty": "Promo code mag niet leeg zijn.",
+          "subscriptionRegionMatch": "Je hebt al een abonnement voor deze regio.",
+          "purchaseError": "Voeg ten minste één item toe voordat je koopt."
+        }
+  }
+  

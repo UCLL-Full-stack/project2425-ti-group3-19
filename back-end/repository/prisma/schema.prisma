@@ -26,9 +26,6 @@ model Order {
   userId          Int
   promotions      Promotion[]    @relation("OrderPromotions")
   orderReferentie String
-  beurtenkaarten  Beurtenkaart[]
-  subscriptions   Subscription[]
-  tickets         Ticket[]
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
 }
@@ -40,7 +37,6 @@ model Beurtenkaart {
   valid     Boolean
   startDate DateTime
   endDate   DateTime
-  order     Order    @relation(fields: [orderId], references: [id])
   orderId   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -52,7 +48,6 @@ model Subscription {
   subtype   String
   startDate DateTime
   endDate   DateTime
-  order     Order    @relation(fields: [orderId], references: [id])
   orderId   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -64,7 +59,6 @@ model Ticket {
   price        Float
   startStation String
   desStation   String
-  order        Order    @relation(fields: [orderId], references: [id])
   orderId      String
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt

@@ -61,6 +61,7 @@ subRouter.get('/subsuser', async (req, res) => {
         const userId = req.query.userId;
         console.log(userId);
         const subscriptions = await subscriptionService.getSubscriptionsByUserId(userId as string);
+        console.log(subscriptions);
         res.status(200).json(subscriptions);
     } catch (error) {
         res.status(400).json({ message: (error as Error).message });
@@ -160,6 +161,7 @@ subRouter.get('/', async (req, res) => {
 subRouter.get('/:orderReferentie', async (req, res, next) => {
     try {
         const { orderReferentie } = req.params;
+        console.log(orderReferentie, "here");
         const subscription = await subscriptionService.getSubscriptionByReferentie(orderReferentie);
         if (!subscription) {
             return res.status(404).json({ message: 'Subscription not found' });

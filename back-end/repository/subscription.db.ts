@@ -32,7 +32,6 @@ const getSubscriptionById = async ({ id }: { id: number }): Promise<Subscription
 const saveSubscription = async (subscription: Subscription): Promise<Subscription> => {
     const subPrisma = await database.subscription.create({
         data: {
-            id: subscription.getId(),
             region: subscription.getRegion(),
             subtype: subscription.getSubtype(),
             startDate: subscription.getStartDate(), 
@@ -44,12 +43,15 @@ const saveSubscription = async (subscription: Subscription): Promise<Subscriptio
 };
 
 const getSubscriptionByReferentie = async (orderReferentie: string) => {
+    console.log(orderReferentie, "test hier");
     try {
         const subscription = await database.subscription.findFirst({
             where: {
                 orderId: orderReferentie,
             },
         });
+
+        console.log(subscription);
 
         return subscription ? Subscription.from(subscription) : null; 
     } catch (error) {
@@ -66,17 +68,27 @@ const findSubscriptionsByUserId = async (userId: string): Promise<Subscription[]
             userId: userIdN, 
         },
         select: {
-            id: true, 
+            orderReferentie: true, 
         },
     });
 
-    const orderIds = ordersPrisma.map(order => order.id);
+    console.log("Orders fetched for userId:", userIdN, ordersPrisma);
+
+    const orderReferenties = ordersPrisma.map(order => order.orderReferentie);
+
+    if (orderReferenties.length === 0) {
+        console.log("No orders found for userId:", userIdN);
+    }
 
     const subPrisma = await database.subscription.findMany({
         where: {
-            orderId: { in: orderIds },
+            orderId: { in: orderReferenties },
         },
     });
+
+    console.log("Subscriptions fetched for orderIds:", orderReferenties, subPrisma);
+
+    console.log("Subscriptions found for userId:", subPrisma.map(subscription => Subscription.from(subscription)));
 
     return subPrisma.map(subscription => Subscription.from(subscription));
 };

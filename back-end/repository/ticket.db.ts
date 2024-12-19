@@ -30,13 +30,16 @@ const getTicketById = async ({ id }: { id: number }): Promise<Ticket | null> => 
 
 // Function to save a new ticket
 const saveTicket = async (ticket: Ticket): Promise<Ticket> => {
+    const orderId = ticket.getOrderId();
     const orderExists = await database.order.findUnique({
-        where: { id: ticket.getOrderId() }, 
+        where: { id: orderId }, 
     });
 
     if (orderExists) {
-        throw new Error(`Order with ID ${ticket.getOrderId()} already exists.`);
+        throw new Error(`Order with ID ${orderId} already exists.`);
     }
+
+    console.log(`Creating ticket for order ID: ${orderId}`);
 
     // Create the ticket
     const prismaTicket = await database.ticket.create({
@@ -45,7 +48,7 @@ const saveTicket = async (ticket: Ticket): Promise<Ticket> => {
             price: ticket.getPrice(),
             startStation: ticket.getStartStation(),
             desStation: ticket.getDesStation(),
-            orderId: ticket.getOrderId(),
+            orderId: orderId,
         },
     });
 
@@ -60,15 +63,15 @@ const findTicketsByUserId = async (userId: string): Promise<Ticket[]> => {
             userId: userIdN, 
         },
         select: {
-            id: true, 
+            orderReferentie: true, 
         },
     });
 
-    const orderIds = ordersPrisma.map(order => order.id);
+    const orderReferenties = ordersPrisma.map(order => order.orderReferentie);
 
     const ticketsPrisma = await database.ticket.findMany({
         where: {
-            orderId: { in: orderIds },
+            orderId: { in: orderReferenties },
         },
     });
 

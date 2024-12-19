@@ -64,6 +64,9 @@ export default function AdminPanel() {
             }
             const data = await response.json();
             console.log(data);
+            if (data.role !== 'admin' || data.role !== 'moderator') {
+                router.push('/');
+            }
             setUser(data);
             setRole(data.role);
         } catch (error) {

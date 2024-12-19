@@ -1,0 +1,50 @@
+{
+    "login": {
+      "title": "Login",
+      "email": "Email address",
+      "password": "Password",
+      "loginButton": "Login",
+      "noaccount": "Register here",
+      "register": "Don't have an account?",
+      "successMessage": "Login successful!" 
+    },
+    "register": {
+        "title": "Register",
+        "firstName": "First name",
+        "lastName": "Last name",
+        "email": "Email address",
+        "password": "Password",
+        "registerButton": "Register",
+        "alreadyAccount": "Already have an account?",
+        "loginHere": "Login here",
+        "registerSuccess": "Registering successful!"
+      },
+      "buyTickets": {
+        "title": "Buy Tickets and Subscriptions",
+        "promoCode": "Promo Code",
+        "applyPromoCode": "Apply Promo Code",
+        "productType": "Product Type",
+        "subscriptionLength": "Subscription Length",
+        "region": "Region",
+        "beginStation": "Begin Station",
+        "endStation": "End Station",
+        "addToList": "Add {{product}} to List",
+        "updateOrder": "Update Order",
+        "buyAll": "Buy All Products",
+        "id": "ID",
+        "orderDate": "Order Date",
+        "price": "Price",
+        "actions": "Actions",
+        "errorMessage": "Please fill out all required fields.",
+        "successMessage": {
+          "added": "{{product}} added to list!",
+          "updated": "{{product}} updated successfully!",
+          "orderPlaced": "Order successfully placed!"
+        },
+        "promoCodeApplied": "Promo code applied! Discount: {{discount}}%",
+        "promoCodeEmpty": "Promo code cannot be empty.",
+        "subscriptionRegionMatch": "You already have a subscription for this region.",
+        "purchaseError": "Please add at least one item before purchasing."
+      }
+  }
+  

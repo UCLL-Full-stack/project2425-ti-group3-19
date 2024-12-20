@@ -43,6 +43,25 @@ export default function Home() {
           </tbody>
         </table>
       </div>
+
+      <div className="container mt-5">
+        <h2>Promo codes</h2>
+
+        <table className="table table-striped mt-4">
+          <thead>
+            <tr>
+              <th>Code</th>
+              <th>Discount</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Promo1</td>
+              <td>10%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </>
   );
 }

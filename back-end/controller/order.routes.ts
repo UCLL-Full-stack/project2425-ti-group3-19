@@ -59,8 +59,11 @@ const orderRouter = express.Router();
  *       500:
  *         description: Internal server error.
  */
-orderRouter.get('/', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+orderRouter.get('/', authenticateUser, async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
+        if (!req.user) {
+            return res.status(401).json({ message: 'User not authenticated' });
+        }
         const orders = await orderService.getAllOrders();
         res.status(200).json(orders);
     } catch (error) {
@@ -102,6 +105,9 @@ orderRouter.post('/', authenticateUser, async (
     next: NextFunction
 ) => {
     try {
+        if (!req.user) {
+            return res.status(401).json({ message: 'User not authenticated' });
+        }
         const { orders, promotionIds } = req.body;
 
         if (!orders || !Array.isArray(orders) || orders.length === 0) {
@@ -154,11 +160,14 @@ orderRouter.post('/', authenticateUser, async (
  *       500:
  *         description: Internal server error.
  */
-orderRouter.get('/user-orders', async (
+orderRouter.get('/user-orders', authenticateUser, async (
     req: AuthenticatedRequest,
     res: Response,
     next: NextFunction
 ) => {
+    if (!req.user) {
+        return res.status(401).json({ message: 'User not authenticated' });
+    }
     const userId = req.query.userId; // Ensure you have userId in the request
     if (!userId) {
         return res.status(400).json({ message: 'UserId is required' });

@@ -83,10 +83,13 @@ const promoRouter = express.Router();
  *                   type: string
  *                   example: "Internal server error."
  */
-promoRouter.post('/validate', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+promoRouter.post('/validate', authenticateUser, async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     const { code } = req.body;
 
     try {
+        if (!req.user) {
+            return res.status(401).json({ message: 'User not authenticated' });
+        }
         const promotion = await promotionService.validatePromotionCode(code);
 
         if (promotion) {

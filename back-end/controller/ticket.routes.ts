@@ -57,12 +57,15 @@ const ticketRouter = express.Router();
  *       400:
  *         description: Bad request. Error message is provided in the response.
  */
-ticketRouter.get('/ticketuser', async (
+ticketRouter.get('/ticketuser', authenticateUser, async (
     req: AuthenticatedRequest,
     res: Response,
     next: NextFunction
 ) => {
     try {
+        if (!req.user) {
+            return res.status(401).json({ message: 'User not authenticated' });
+        }
         const userId = req.query.userId;
         console.log(userId);
         const tickets = await ticketService.getTicketsByUserId(userId as string);
@@ -98,8 +101,15 @@ ticketRouter.get('/ticketuser', async (
  *       400:
  *         description: Bad request. Error message is provided in the response.
  */
-ticketRouter.post('/', async (req, res) => {
+ticketRouter.post('/', authenticateUser, async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+) => {
     try {
+        if (!req.user) {
+            return res.status(401).json({ message: 'User not authenticated' });
+        }
         const ticket = await ticketService.createTicket(req.body);
         res.status(201).json(ticket);
     } catch (error) {
@@ -129,8 +139,15 @@ ticketRouter.post('/', async (req, res) => {
  *       400:
  *         description: Bad request. Error message is provided in the response.
  */
-ticketRouter.get('/', async (req, res) => {
+ticketRouter.get('/', authenticateUser, async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+) => {
     try {
+        if (!req.user) {
+            return res.status(401).json({ message: 'User not authenticated' });
+        }
         const tickets = await ticketService.getAllTickets();
         res.status(200).json(tickets);
     } catch (error) {
@@ -167,8 +184,15 @@ ticketRouter.get('/', async (req, res) => {
  *       400:
  *         description: Bad request. Error message is provided in the response.
  */
-ticketRouter.get('/:id', async (req, res) => {
+ticketRouter.get('/:id', authenticateUser, async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+) => {
     try {
+        if (!req.user) {
+            return res.status(401).json({ message: 'User not authenticated' });
+        }
         const ticket = await ticketService.getTicketById(parseInt(req.params.id));
         if (ticket) {
             res.status(200).json(ticket);

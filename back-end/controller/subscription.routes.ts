@@ -57,13 +57,16 @@ const subRouter = express.Router();
  *       400:
  *         description: Bad request. Error message is provided in the response.
  */
-subRouter.get('/subsuser', async (
+subRouter.get('/subsuser', authenticateUser, async (
     req: AuthenticatedRequest,
     res: Response,
     next: NextFunction
 ) => {
     console.log("anwezf");
     try {
+        if (!req.user) {
+            return res.status(401).json({ message: 'User not authenticated' });
+        }
         const userId = req.query.userId;
         console.log(userId);
         const subscriptions = await subscriptionService.getSubscriptionsByUserId(userId as string);
@@ -98,8 +101,15 @@ subRouter.get('/subsuser', async (
  *       400:
  *         description: Bad request. Error message is provided in the response.
  */
-subRouter.post('/subscriptions', async (req, res) => {
+subRouter.post('/subscriptions', authenticateUser, async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+) => {
     try {
+        if (!req.user) {
+            return res.status(401).json({ message: 'User not authenticated' });
+        }
         const subscription = await subscriptionService.createSubscription(req.body);
         res.status(201).json(subscription);
     } catch (error) {
@@ -127,9 +137,16 @@ subRouter.post('/subscriptions', async (req, res) => {
  *       400:
  *         description: Bad request. Error message is provided in the response.
  */
-subRouter.get('/', async (req, res) => {
+subRouter.get('/', authenticateUser, async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+) => {
     console.log("aaaaaddddddd");
     try {
+        if (!req.user) {
+            return res.status(401).json({ message: 'User not authenticated' });
+        }
         const subscriptions = await subscriptionService.getAllSubscriptions();
         res.status(200).json(subscriptions);
     } catch (error) {
@@ -164,8 +181,15 @@ subRouter.get('/', async (req, res) => {
  *       400:
  *         description: Bad request. Error message is provided in the response.
  */
-subRouter.get('/:orderReferentie', async (req, res, next) => {
+subRouter.get('/:orderReferentie', authenticateUser, async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+) => {
     try {
+        if (!req.user) {
+            return res.status(401).json({ message: 'User not authenticated' });
+        }
         const { orderReferentie } = req.params;
         console.log(orderReferentie, "here");
         const subscription = await subscriptionService.getSubscriptionByReferentie(orderReferentie);
@@ -205,8 +229,15 @@ subRouter.get('/:orderReferentie', async (req, res, next) => {
  *       400:
  *         description: Bad request. Error message is provided in the response.
  */
-subRouter.get('/subscriptions/:id', async (req, res) => {
+subRouter.get('/subscriptions/:id', authenticateUser, async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+) => {
     try {
+        if (!req.user) {
+            return res.status(401).json({ message: 'User not authenticated' });
+        }
         const subscription = await subscriptionService.getSubscriptionById(parseInt(req.params.id));
         if (subscription) {
             res.status(200).json(subscription);

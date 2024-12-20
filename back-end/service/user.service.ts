@@ -5,6 +5,7 @@ import { Role } from '../types';
 import { Order } from '../model/order';
 import orderService from './order.service';
 import {v4 as uuidv4} from "uuid";
+import bcrypt from 'bcrypt';
 
 const getAllUsers = async(): Promise<User[]> => {
     return userRepository.getAllUsers();
@@ -42,7 +43,8 @@ const getUserByEmail = async (email: string): Promise<User | null> => {
 
 const createUser = async (userData: { firstName: string; lastName: string; email: string; password: string; role: Role }): Promise<User> => {
     try {
-        const newUser = await userRepository.saveUser(userData);
+        const hashedPassword = await bcrypt.hash(userData.password, 12);
+        const newUser = await userRepository.saveUser({...userData, password: hashedPassword});
 
         const orderReferentie = uuidv4();
 
@@ -75,9 +77,9 @@ const createUser = async (userData: { firstName: string; lastName: string; email
 
 const verifyUserCredentials = async (email: string, password: string): Promise<boolean> => {
     const user = await getUserByEmail(email); // This will now return User or null
-
+    const hashedPassword = await bcrypt.hash(password, 12);
     if (user) {
-        return user.getPassword() === password; // Direct comparison (not secure for production)
+        return user.getPassword() === hashedPassword; // Direct comparison (not secure for production)
     }
 
     return false; // User not found

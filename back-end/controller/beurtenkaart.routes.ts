@@ -59,8 +59,11 @@ const beurtRouter = express.Router();
  *       500:
  *         description: Internal server error.
  */
-beurtRouter.get('/beurtuser', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+beurtRouter.get('/beurtuser', authenticateUser, async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
+        if (!req.user) {
+            return res.status(401).json({ message: 'User not authenticated' });
+        }
         const userId = req.query.userId;
         const tickets = await beurtenkaartService.getBeurtenByUserId(userId as string);
         res.status(200).json(tickets);
@@ -97,8 +100,11 @@ beurtRouter.get('/beurtuser', async (req: AuthenticatedRequest, res: Response, n
  *       500:
  *         description: Internal server error.
  */
-beurtRouter.post('/beurtenkaarten', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+beurtRouter.post('/beurtenkaarten', authenticateUser, async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
+        if (!req.user) {
+            return res.status(401).json({ message: 'User not authenticated' });
+        }
         const beurtenkaart = await beurtenkaartService.createBeurtenkaart(req.body);
         res.status(201).json(beurtenkaart);
     } catch (error) {
@@ -128,8 +134,11 @@ beurtRouter.post('/beurtenkaarten', async (req: AuthenticatedRequest, res: Respo
  *       500:
  *         description: Internal server error.
  */
-beurtRouter.get('/beurtenkaarten', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+beurtRouter.get('/beurtenkaarten', authenticateUser, async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
+        if (!req.user) {
+            return res.status(401).json({ message: 'User not authenticated' });
+        }
         const beurtenkaarten = await beurtenkaartService.getAllBeurtenkaarten();
         res.status(200).json(beurtenkaarten);
     } catch (error) {
@@ -167,8 +176,11 @@ beurtRouter.get('/beurtenkaarten', async (req: AuthenticatedRequest, res: Respon
  *       500:
  *         description: Internal server error.
  */
-beurtRouter.get('/beurtenkaarten/:id', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+beurtRouter.get('/beurtenkaarten/:id', authenticateUser, async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
+        if (!req.user) {
+            return res.status(401).json({ message: 'User not authenticated' });
+        }
         const beurtenkaart = await beurtenkaartService.getBeurtenkaartById(parseInt(req.params.id));
         if (beurtenkaart) {
             res.status(200).json(beurtenkaart);

@@ -59,8 +59,11 @@ const JWT_SECRET = process.env.JWT_SECRET || 'F_wMoWC2jXN2cW2l-aLRtiNNShI9SfVPeE
  *       500:
  *         description: Internal server error.
  */
-userRouter.get('/', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+userRouter.get('/', authenticateUser, async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
+        if (!req.user) {
+            return res.status(401).json({ message: 'User not authenticated' });
+        }
         const users = await userService.getAllUsers();
         res.status(200).json(users);
     } catch (error) {
@@ -96,9 +99,12 @@ userRouter.get('/', async (req: AuthenticatedRequest, res: Response, next: NextF
  *       500:
  *         description: Internal server error.
  */
-userRouter.get('/:id', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+userRouter.get('/:id', authenticateUser, async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     const { id } = req.params;
     try {
+        if (!req.user) {
+            return res.status(401).json({ message: 'User not authenticated' });
+        }
         const user = await userService.getUserById(Number(id));
         res.status(200).json(user);
     } catch (error) {

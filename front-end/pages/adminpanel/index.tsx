@@ -105,7 +105,7 @@ export default function AdminPanel() {
         {successMessage && <AlertMessage message={successMessage} type="success" />}
         
         {/* Orders Section */}
-        <h3>Your Orders</h3>
+        <h3>All Orders</h3>
         <OrderTable orders={orders} />
 
         {/* Users Section */}

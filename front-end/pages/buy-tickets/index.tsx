@@ -111,12 +111,16 @@ export default function BuyTickets() {
                 }
             }
 
+            const discountedPrice = promoCodeDiscount
+            ? 50 - (50 * promoCodeDiscount / 100)
+            : 50;
+
             const orderDate = new Date();
             const orderData = {
                 id: currentOrderId ?? orderList.length + 1,
                 product: selectedOption,
                 orderDate: orderDate.toISOString(),
-                price: 50,
+                price: discountedPrice,
                 region: region?.label,
                 beginStation: beginStation?.label,
                 endStation: endStation?.label,
@@ -192,7 +196,7 @@ export default function BuyTickets() {
                 {successMessage && <div className="alert alert-success">{successMessage}</div>}
 
                 <div className="mt-3">
-                    <label htmlFor="promoCode">Promo Code</label>
+                    <label htmlFor="promoCode">Promo Code (Add promo code first)</label>
                     <input
                         type="text"
                         id="promoCode"
@@ -303,7 +307,7 @@ export default function BuyTickets() {
                                 <td>{order.id}</td>
                                 <td>{order.product}</td>
                                 <td>{new Date(order.orderDate).toLocaleDateString()}</td>
-                                <td>${order.price}</td>
+                                <td>${order.price.toFixed(2)}</td>
                                 <td>{order.region}</td>
                                 <td>{order.beginStation}</td>
                                 <td>{order.endStation}</td>

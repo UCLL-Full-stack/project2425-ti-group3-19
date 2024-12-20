@@ -103,4 +103,14 @@ promoRouter.post('/validate', authenticateUser, async (req: AuthenticatedRequest
     }
 });
 
+export const addPromo = async (req: Request, res: Response) => {
+    try {
+        const promotionData = req.body; // Assuming the promotion data is sent in the body
+        const newPromotion = await promotionService.addPromotionToDB(promotionData);
+        res.status(201).json(newPromotion);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to add promotion' });
+    }
+};
+
 export { promoRouter };

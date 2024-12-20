@@ -24,7 +24,12 @@ const getPromotionsByIds = async (ids: number[]): Promise<Promotion[]> => {
     return promotions.map(promotion => Promotion.from(promotion)); // Map to your Promotion model
 };
 
+const addPromotion = async (promotionData: any) => {
+    return await prisma.promotion.create({ data: promotionData });
+};
+
 export default {
     findPromotionByCode,
     getPromotionsByIds,
+    addPromotion,
 };

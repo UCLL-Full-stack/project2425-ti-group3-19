@@ -54,7 +54,7 @@ export default function BuyTickets() {
         }
 
         try {
-            const result = await OrdersService.validatePromoCode({promoCode});
+            const result = await OrdersService.validatePromoCode({promoCode, token: token as string});
             setPromoCodeDiscount(result.discount);
             setPromoCodeMessage(`Promo code applied! Discount: ${result.discount}%`);
         } catch (error) {
@@ -95,7 +95,7 @@ export default function BuyTickets() {
                         console.log(order.orderReferentie);
                         if (order.product === 'Subscription') {
                             console.log(order.orderReferentie);
-                            const subscription = await SubscriptionService.getSubscription({orderReferentie: order.orderReferentie});
+                            const subscription = await SubscriptionService.getSubscription({orderReferentie: order.orderReferentie, token: token as string});
                             if (subscription.region === region?.label) {
                                 return true;
                             }

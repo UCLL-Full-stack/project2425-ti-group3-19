@@ -34,12 +34,13 @@ const loginUser = async (email: string, password: string) => {
     }
     return response
 }
-const getUserByID = async (userId: number) => {
+const getUserByID = async (userId: number, token: string) => {
     try {
         const response = await fetch(`${api}/users/${userId}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
             },
         });
         if (!response.ok) {

@@ -2,11 +2,14 @@ import { Order } from "@/types";
 
 const api = process.env.NEXT_PUBLIC_API_URL;
 
-const validatePromoCode = async ({ promoCode }: { promoCode: string }) => {
+const validatePromoCode = async ({ promoCode, token }: { promoCode: string, token: string }) => {
     try {
         const response = await fetch(`${api}/promocodes/validate`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+            },
             body: JSON.stringify({ promoCode }),
         });
 

@@ -59,7 +59,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'F_wMoWC2jXN2cW2l-aLRtiNNShI9SfVPeE
  *       500:
  *         description: Internal server error.
  */
-userRouter.get('/', async (req: Request, res: Response, next: NextFunction) => {
+userRouter.get('/', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
         const users = await userService.getAllUsers();
         res.status(200).json(users);
@@ -96,7 +96,7 @@ userRouter.get('/', async (req: Request, res: Response, next: NextFunction) => {
  *       500:
  *         description: Internal server error.
  */
-userRouter.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
+userRouter.get('/:id', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     const { id } = req.params;
     try {
         const user = await userService.getUserById(Number(id));
@@ -151,7 +151,7 @@ userRouter.get('/:id', async (req: Request, res: Response, next: NextFunction) =
  *       500:
  *         description: Internal server error.
  */
-userRouter.post('/', async (req: Request, res: Response, next: NextFunction) => {
+userRouter.post('/', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
         const { firstName, lastName, email, password, role } = req.body;
 

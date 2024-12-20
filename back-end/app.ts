@@ -11,6 +11,7 @@ import { subRouter } from './controller/subscription.routes';
 import { beurtRouter } from './controller/beurtenkaart.routes';
 import { ticketRouter } from './controller/ticket.routes';
 import { promoRouter } from './controller/promo.routes';
+import helmet from 'helmet';
 
 const app = express();
 dotenv.config();
@@ -22,6 +23,8 @@ app.use(cors({
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+app.use(helmet());
 
 app.use(bodyParser.json());
 

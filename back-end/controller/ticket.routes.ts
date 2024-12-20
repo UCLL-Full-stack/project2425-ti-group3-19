@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import ticketService from '../service/ticket.service'; // Adjust the import path as necessary
 import express, { NextFunction, Request, Response } from 'express';
+import { AuthenticatedRequest } from '../types/express';
+import { authenticateUser } from "../middleware/authenticateUser";
 
 const ticketRouter = express.Router();
 
@@ -55,7 +57,11 @@ const ticketRouter = express.Router();
  *       400:
  *         description: Bad request. Error message is provided in the response.
  */
-ticketRouter.get('/ticketuser', async (req, res) => {
+ticketRouter.get('/ticketuser', async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+) => {
     try {
         const userId = req.query.userId;
         console.log(userId);

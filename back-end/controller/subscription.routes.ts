@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import subscriptionService from '../service/subscription.service';
 import express, { NextFunction, Request, Response } from 'express';
+import { AuthenticatedRequest } from '../types/express';
+import { authenticateUser } from "../middleware/authenticateUser";
 
 const subRouter = express.Router();
 
@@ -55,7 +57,11 @@ const subRouter = express.Router();
  *       400:
  *         description: Bad request. Error message is provided in the response.
  */
-subRouter.get('/subsuser', async (req, res) => {
+subRouter.get('/subsuser', async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+) => {
     console.log("anwezf");
     try {
         const userId = req.query.userId;

@@ -52,7 +52,7 @@ export default function AccountPage() {
 
     const fetchAllUserData = async (userId: number, token: string) => {
         try {
-            const userData = await userService.getUserByID(userId);
+            const userData = await userService.getUserByID(userId, token);
             setUser(userData);
 
             const ordersData = await OrdersService.getUserOrders({ userId, token });

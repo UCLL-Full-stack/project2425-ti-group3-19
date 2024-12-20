@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import beurtenkaartService from '../service/beurtenkaart.service';
 import express, { NextFunction, Request, Response } from 'express';
+import {authenticateUser} from '../middleware/authenticateUser';
+import { AuthenticatedRequest } from '../types/express';
 
 const beurtRouter = express.Router();
 
@@ -57,7 +59,7 @@ const beurtRouter = express.Router();
  *       500:
  *         description: Internal server error.
  */
-beurtRouter.get('/beurtuser', async (req, res) => {
+beurtRouter.get('/beurtuser', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
         const userId = req.query.userId;
         const tickets = await beurtenkaartService.getBeurtenByUserId(userId as string);
@@ -95,7 +97,7 @@ beurtRouter.get('/beurtuser', async (req, res) => {
  *       500:
  *         description: Internal server error.
  */
-beurtRouter.post('/beurtenkaarten', async (req, res) => {
+beurtRouter.post('/beurtenkaarten', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
         const beurtenkaart = await beurtenkaartService.createBeurtenkaart(req.body);
         res.status(201).json(beurtenkaart);
@@ -126,7 +128,7 @@ beurtRouter.post('/beurtenkaarten', async (req, res) => {
  *       500:
  *         description: Internal server error.
  */
-beurtRouter.get('/beurtenkaarten', async (req, res) => {
+beurtRouter.get('/beurtenkaarten', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
         const beurtenkaarten = await beurtenkaartService.getAllBeurtenkaarten();
         res.status(200).json(beurtenkaarten);
@@ -165,7 +167,7 @@ beurtRouter.get('/beurtenkaarten', async (req, res) => {
  *       500:
  *         description: Internal server error.
  */
-beurtRouter.get('/beurtenkaarten/:id', async (req, res) => {
+beurtRouter.get('/beurtenkaarten/:id', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
         const beurtenkaart = await beurtenkaartService.getBeurtenkaartById(parseInt(req.params.id));
         if (beurtenkaart) {

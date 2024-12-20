@@ -1,12 +1,13 @@
 const api = process.env.NEXT_PUBLIC_API_URL;
 
-const getSubscription = async ({ orderReferentie }: { orderReferentie: string }) => {
+const getSubscription = async ({ orderReferentie, token }: { orderReferentie: string, token: string }) => {
     try {
         console.log(orderReferentie);
         const response = await fetch(`${api}/subscriptions/${orderReferentie}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
             },
         });
 

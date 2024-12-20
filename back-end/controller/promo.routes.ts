@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import promotionService from '../service/promo.service'; // Adjust the import path as necessary
 import express, { NextFunction, Request, Response } from 'express';
+import {authenticateUser} from '../middleware/authenticateUser';
+import { AuthenticatedRequest } from '../types/express';
 
 const promoRouter = express.Router();
 
@@ -81,7 +83,7 @@ const promoRouter = express.Router();
  *                   type: string
  *                   example: "Internal server error."
  */
-promoRouter.post('/validate', async (req, res) => {
+promoRouter.post('/validate', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     const { code } = req.body;
 
     try {

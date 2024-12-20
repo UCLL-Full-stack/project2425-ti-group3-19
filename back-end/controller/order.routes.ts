@@ -59,7 +59,7 @@ const orderRouter = express.Router();
  *       500:
  *         description: Internal server error.
  */
-orderRouter.get('/', async (req: Request, res: Response, next: NextFunction) => {
+orderRouter.get('/', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
         const orders = await orderService.getAllOrders();
         res.status(200).json(orders);
@@ -154,7 +154,11 @@ orderRouter.post('/', authenticateUser, async (
  *       500:
  *         description: Internal server error.
  */
-orderRouter.get('/user-orders', async (req, res) => {
+orderRouter.get('/user-orders', async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+) => {
     const userId = req.query.userId; // Ensure you have userId in the request
     if (!userId) {
         return res.status(400).json({ message: 'UserId is required' });

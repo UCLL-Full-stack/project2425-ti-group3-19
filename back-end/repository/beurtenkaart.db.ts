@@ -33,7 +33,6 @@ const saveBeurtenkaart = async ({ id,beurten,price,valid,startDate, endDate, ord
     try {
         const beurtenPrisma = await database.beurtenkaart.create({
             data: {
-                id,
                 beurten,
                 price,
                 valid,

@@ -19,8 +19,6 @@ const authenticateUser = async (
     res: Response,
     next: NextFunction
 ) => {
-    console.log('Authenticating request...'); // Log entry point
-    console.log('Headers:', req.headers);
     const token = req.headers['authorization']?.split(' ')[1];
 
     if (!token) {
@@ -28,19 +26,14 @@ const authenticateUser = async (
     }
 
     try {
-        console.log('Token received:', token.substring(0, 20) + '...');
         const decoded = jwt.verify(token, JWT_SECRET as string) as JWTPayload;
-        console.log('Decoded token:', decoded);
-        console.log('User ID from token:', decoded.id, typeof decoded.id);
         
         const userId = Number(decoded.id);
-        console.log('Parsed user ID:', userId, typeof userId);
         if (isNaN(userId)) {
             return res.status(400).json({ message: 'Invalid user ID in token' });
         }
 
         const user = await userService.getUserById(userId);
-        console.log('Found user:', user);
 
         if (!user) {
             return res.status(401).json({ message: 'User not found' });

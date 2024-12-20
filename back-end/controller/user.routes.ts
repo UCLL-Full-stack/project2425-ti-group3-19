@@ -39,37 +39,8 @@ import { AuthenticatedRequest } from '../types/express';
 const userRouter = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'F_wMoWC2jXN2cW2l-aLRtiNNShI9SfVPeEKXg5olAUQ';
 
-/**
- * @swagger
- * /users:
- *   get:
- *     summary: Get a list of all users.
- *     description: Returns a JSON array of all users. Each user object contains an ID, name, and role.
- *     tags:
- *       - Users
- *     responses:
- *       200:
- *         description: A list of users.
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/User'
- *       500:
- *         description: Internal server error.
- */
-userRouter.get('/', authenticateUser, async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-    try {
-        if (!req.user) {
-            return res.status(401).json({ message: 'User not authenticated' });
-        }
-        const users = await userService.getAllUsers();
-        res.status(200).json(users);
-    } catch (error) {
-        next(error);
-    }
-});
+
+
 
 /**
  * @swagger
@@ -99,8 +70,9 @@ userRouter.get('/', authenticateUser, async (req: AuthenticatedRequest, res: Res
  *       500:
  *         description: Internal server error.
  */
-userRouter.get('/:id', authenticateUser, async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+userRouter.get('/user/:id', authenticateUser, async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     const { id } = req.params;
+    console.log("test here");
     try {
         if (!req.user) {
             return res.status(401).json({ message: 'User not authenticated' });
@@ -112,6 +84,40 @@ userRouter.get('/:id', authenticateUser, async (req: AuthenticatedRequest, res: 
             return res.status(404).json({ message: (error as Error).message });
         }
         next(error); // For other errors
+    }
+});
+
+
+/**
+ * @swagger
+ * /users:
+ *   get:
+ *     summary: Get a list of all users.
+ *     description: Returns a JSON array of all users. Each user object contains an ID, name, and role.
+ *     tags:
+ *       - Users
+ *     responses:
+ *       200:
+ *         description: A list of users.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/User'
+ *       500:
+ *         description: Internal server error.
+ */
+userRouter.get('/', authenticateUser, async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+        console.log("test here");
+        if (!req.user) {
+            return res.status(401).json({ message: 'User not authenticated' });
+        }
+        const users = await userService.getAllUsers();
+        res.status(200).json(users);
+    } catch (error) {
+        next(error);
     }
 });
 

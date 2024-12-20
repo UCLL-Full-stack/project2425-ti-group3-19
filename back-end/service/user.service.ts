@@ -78,8 +78,10 @@ const createUser = async (userData: { firstName: string; lastName: string; email
 const verifyUserCredentials = async (email: string, password: string): Promise<boolean> => {
     const user = await getUserByEmail(email); // This will now return User or null
     const hashedPassword = await bcrypt.hash(password, 12);
+    console.log(hashedPassword)
     if (user) {
-        return user.getPassword() === hashedPassword; // Direct comparison (not secure for production)
+        console.log(user.getPassword());
+        return await bcrypt.compare(password, user.getPassword());
     }
 
     return false; // User not found

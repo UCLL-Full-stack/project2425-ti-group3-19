@@ -29,7 +29,7 @@ export default function AdminPanel() {
             const userId = getUserIdFromToken(authToken);
             if (userId) {
                 console.log(userId);
-                fetchUserDetails(userId);
+                fetchUserDetails(userId, authToken);
             }
         }
     }, [router]);
@@ -56,15 +56,22 @@ export default function AdminPanel() {
         }
     };
 
-    const fetchUserDetails = async (userId: number) => {
+    const fetchUserDetails = async (userId: number, token: string) => {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${userId}`);
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/user/${userId}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
             if (!response.ok) {
                 throw new Error('Failed to fetch user details');
             }
             const data = await response.json();
             console.log(data);
-            if (data.role !== 'admin' || data.role !== 'moderator') {
+            console.log(data.role);
+            if (data.role === 'user') {
                 router.push('/');
             }
             setUser(data);
@@ -93,6 +100,7 @@ export default function AdminPanel() {
             setErrorMessage('Failed to update role. Please try again.');
         } finally {
             setLoading(false);
+            router.reload();
         }
     };
 

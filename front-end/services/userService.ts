@@ -68,6 +68,20 @@ const getAllUsers = async (token: string): Promise<User[]> => {
     return response.json(); // Return the list of users
 }
 
+const getUserDetails = async (userId: number, token: string) => {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/user/${userId}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+        },
+    });
+    if (!response.ok) {
+        throw new Error('Failed to fetch user details');
+    }
+    return response.json();
+}
+
 const updateUserRole = async (userId: number, role: string, token: string) => {
     return await fetch(`${api}/users/${userId}/role`, {
         method: 'PUT',
@@ -79,4 +93,4 @@ const updateUserRole = async (userId: number, role: string, token: string) => {
     });
 }
 
-export default { registerNewUser, loginUser, getUserByID, getAllUsers, updateUserRole };
+export default { registerNewUser, loginUser, getUserByID, getAllUsers, updateUserRole, getUserDetails, };
